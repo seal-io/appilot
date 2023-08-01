@@ -1,0 +1,1 @@
+"""Seal API HTTP client."""
