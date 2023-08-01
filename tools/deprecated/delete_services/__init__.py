@@ -1,1 +1,0 @@
-"""Tool for deleting services."""
