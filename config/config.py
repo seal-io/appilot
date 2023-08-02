@@ -1,28 +1,27 @@
 import json
 import os
-from attr import dataclass
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from seal.client import SealClient
 
 
-@dataclass
-class _context:
+class Context(BaseModel):
     project_id: str = ""
     project_name: str = ""
     environment_id: str = ""
     environment_name: str = ""
 
 
-@dataclass
-class _config:
+class Config(BaseModel):
     openai_api_key: str
     seal_api_key: str
     seal_url: str
-    context: _context
+    natural_language: str = "English"
+    context: Context
 
 
-Config: _config
+CONFIG: Config
 
 
 def initConfig():
@@ -30,6 +29,7 @@ def initConfig():
     openai_api_key = os.getenv("OPENAI_API_KEY")
     seal_api_key = os.getenv("SEAL_API_KEY")
     seal_url = os.getenv("SEAL_URL")
+    natural_language = os.getenv("NATURAL_LANGUAGE")
 
     if seal_url is None:
         raise Exception("SEAL_URL is not set")
@@ -38,27 +38,30 @@ def initConfig():
     if openai_api_key is None:
         raise Exception("OPENAI_API_KEY is not set")
 
+
+    global CONFIG
     context = _default_context(seal_url, seal_api_key)
-    global Config
-    Config = _config(openai_api_key, seal_api_key, seal_url, context)
+    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url, context=context)
+    if natural_language is not None and natural_language.strip():
+        CONFIG.natural_language = natural_language
 
 
-def updateContext(context: _context):
-    global Config
-    Config.context = context
+def updateContext(context: Context):
+    global CONFIG
+    CONFIG.context = context
 
 
-def _default_context(seal_url: str, seal_api_key: str) -> _context:
+def _default_context(seal_url: str, seal_api_key: str) -> Context:
     seal_client = SealClient(
         seal_url,
         seal_api_key,
         verify=False,
     )
-    context = _context()
+    context = Context()
     projects = seal_client.list_projects()
     if len(projects) > 0:
         project = projects[0]
-        context = _context(
+        context = Context(
             project_id=project["id"],
             project_name=project["name"],
         )

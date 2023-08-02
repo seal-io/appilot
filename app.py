@@ -1,6 +1,7 @@
 from langchain.chat_models import ChatOpenAI
 from config import config
 from config.config import initConfig
+from i18n import text
 from seal.client import SealClient
 from utils import utils
 from agent.agent import create_seal_agent
@@ -13,9 +14,11 @@ llm = ChatOpenAI(
     temperature=0.0,
 )
 
+text.init_system_messages(llm)
+
 seal_client = SealClient(
-    config.Config.seal_url,
-    config.Config.seal_api_key,
+    config.CONFIG.seal_url,
+    config.CONFIG.seal_api_key,
     verify=False,
 )
 
@@ -36,7 +39,7 @@ seal_agent = create_seal_agent(
 #     "Update llama-2 service and use a larger VM instance"
 # )
 
-print("What can I help?")
+print(text.get("welcome"))
 user_query = input(">")
 while user_query != "exit":
     result = seal_agent.run(user_query)

@@ -11,7 +11,7 @@ class CurrentContextTool(BaseTool):
     description = "Get current project and environment context."
 
     def _run(self, query: str) -> str:
-        return json.dumps(config.Config.context.__dict__)
+        return json.dumps(config.CONFIG.context.__dict__)
 
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""

@@ -1,9 +1,9 @@
 import json
 from typing import Any
 from langchain.agents.tools import BaseTool
-from callbacks.approval import ApprovalCallbackHandler
 from config import config
 from seal.client import SealClient
+from tools.base.tools import RequireApprovalTool
 
 
 class ListEnvironmentsTool(BaseTool):
@@ -22,7 +22,7 @@ class ListEnvironmentsTool(BaseTool):
         raise NotImplementedError("async not supported")
 
 
-class DeleteEnvironmentsTool(BaseTool):
+class DeleteEnvironmentsTool(RequireApprovalTool):
     """Tool to delete environments."""
 
     name = "delete_environments"
@@ -31,13 +31,8 @@ class DeleteEnvironmentsTool(BaseTool):
     )
     seal_client: SealClient
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(
-            callbacks=[ApprovalCallbackHandler(tool_name="delete_environments")], **data
-        )
-
     def _run(self, text: str) -> str:
-        project_id = config.Config.context.project_id
+        project_id = config.CONFIG.context.project_id
         return self.seal_client.delete_environments(project_id, text)
 
     async def _arun(self, query: str) -> str:
@@ -59,7 +54,7 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
 
     def _run(self, text: str) -> str:
         data = {
-            "project_id": config.Config.context.project_id,
+            "project_id": config.CONFIG.context.project_id,
             "environment_id": text,
         }
         # graph_data = self.seal_client.get_environment_graph(project_id, text)

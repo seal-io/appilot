@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from langchain.agents.agent import AgentExecutor
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
+    FORMAT_INSTRUCTIONS_TEMPLATE,
 )
 from langchain.agents.conversational.base import ConversationalAgent
 from langchain.agents import load_tools
@@ -11,6 +12,7 @@ from langchain.chains.llm import LLMChain
 from langchain.memory import ReadOnlySharedMemory
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.agents import load_tools
+from config import config
 from seal.client import SealClient
 from utils import utils
 from tools.manage_service.tool import (
@@ -68,26 +70,14 @@ def create_seal_agent(
         ]
     )
 
-    # prompt = PromptTemplate(
-    #     template=API_ORCHESTRATOR_PROMPT,
-    #     input_variables=["input", "chat_history", "agent_scratchpad"],
-    #     partial_variables={
-    #         "tool_names": ", ".join([tool.name for tool in tools]),
-    #         "tool_descriptions": "\n".join(
-    #             [f"{tool.name}: {tool.description}" for tool in tools]
-    #         ),
-    #     },
-    # )
-
+    format_instructions=FORMAT_INSTRUCTIONS_TEMPLATE.format(natural_language=config.CONFIG.natural_language)
     prompt = ConversationalAgent.create_prompt(
         tools,
         prefix=AGENT_PROMPT_PREFIX,
-        input_variables=["input", "agent_scratchpad", "chat_history"],
-        # suffix=suffix,
-        # format_instructions=format_instructions,
+        format_instructions=format_instructions,
     )
 
-    # ZeroShotAgent
+
     agent = ConversationalAgent(
         llm_chain=LLMChain(llm=llm, prompt=prompt, verbose=utils.verbose()),
         allowed_tools=[tool.name for tool in tools],

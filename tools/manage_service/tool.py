@@ -1,12 +1,12 @@
 import json
 from typing import Any
-from callbacks.approval import ApprovalCallbackHandler
 from config import config
 from seal.client import SealClient
 from langchain.agents.tools import BaseTool
 from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
+from tools.base.tools import RequireApprovalTool
 from tools.manage_service.prompt import (
     CONSTRUCT_SERVICE_PROMPT,
 )
@@ -20,8 +20,8 @@ class ListServicesTool(BaseTool):
     seal_client: SealClient
 
     def _run(self, query: str) -> str:
-        project_id = config.Config.context.project_id
-        environment_id = config.Config.context.environment_id
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         services = self.seal_client.list_services(project_id, environment_id)
         return json.dumps(services)
 
@@ -38,8 +38,8 @@ class GetServicesTool(BaseTool):
     seal_client: SealClient
 
     def _run(self, query: str) -> str:
-        project_id = config.Config.context.project_id
-        environment_id = config.Config.context.environment_id
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         service = self.seal_client.get_service_by_name(
             project_id, environment_id, query
         )
@@ -50,7 +50,7 @@ class GetServicesTool(BaseTool):
         raise NotImplementedError("async not supported")
 
 
-class CreateServiceTool(BaseTool):
+class CreateServiceTool(RequireApprovalTool):
     """Tool to create a service."""
 
     name = "create_service"
@@ -61,11 +61,6 @@ class CreateServiceTool(BaseTool):
     )
     seal_client: SealClient
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(
-            callbacks=[ApprovalCallbackHandler(tool_name="create_service")], **data
-        )
-
     def _run(self, text: str) -> str:
         try:
             # verify input
@@ -73,8 +68,8 @@ class CreateServiceTool(BaseTool):
         except json.JSONDecodeError as e:
             raise e
 
-        project_id = config.Config.context.project_id
-        environment_id = config.Config.context.environment_id
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         return self.seal_client.create_service(project_id, environment_id, text)
 
     async def _arun(self, query: str) -> str:
@@ -82,7 +77,7 @@ class CreateServiceTool(BaseTool):
         raise NotImplementedError("custom_search does not support async")
 
 
-class UpdateServiceTool(BaseTool):
+class UpdateServiceTool(RequireApprovalTool):
     """Tool to update a service."""
 
     name = "update_service"
@@ -93,14 +88,9 @@ class UpdateServiceTool(BaseTool):
     )
     seal_client: SealClient
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(
-            callbacks=[ApprovalCallbackHandler(tool_name="update_service")], **data
-        )
-
     def _run(self, text: str) -> str:
-        project_id = config.Config.context.project_id
-        environment_id = config.Config.context.environment_id
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         return self.seal_client.update_service(project_id, environment_id, text)
 
     async def _arun(self, query: str) -> str:
@@ -108,20 +98,15 @@ class UpdateServiceTool(BaseTool):
         raise NotImplementedError("async not supported")
 
 
-class DeleteServicesTool(BaseTool):
+class DeleteServicesTool(RequireApprovalTool):
     """Tool to delete one or multiple services."""
 
     name = "delete_services"
     description = "Delete one or multiple services. Input should be ids of services."
     seal_client: SealClient
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(
-            callbacks=[ApprovalCallbackHandler(tool_name="delete_services")], **data
-        )
-
     def _run(self, query: str) -> str:
-        project_id = config.Config.context.project_id
+        project_id = config.CONFIG.context.project_id
         return self.seal_client.delete_services(project_id, query)
 
     async def _arun(self, query: str) -> str:
@@ -141,7 +126,7 @@ class GetServiceAccessEndpointsTool(BaseTool):
     seal_client: SealClient
 
     def _run(self, text: str) -> str:
-        project_id = config.Config.context.project_id
+        project_id = config.CONFIG.context.project_id
         return self.seal_client.get_service_access_endpoints(project_id, text)
 
     async def _arun(self, query: str) -> str:
@@ -162,7 +147,7 @@ class ListServiceResourcesTool(BaseTool):
     seal_client: SealClient
 
     def _run(self, text: str) -> str:
-        project_id = config.Config.context.project_id
+        project_id = config.CONFIG.context.project_id
         return self.seal_client.list_service_resources(project_id, text)
 
     async def _arun(self, query: str) -> str:
@@ -184,7 +169,7 @@ class GetServiceDependencyGraphTool(BaseTool):
 
     def _run(self, text: str) -> str:
         data = {
-            "project_id": config.Config.context.project_id,
+            "project_id": config.CONFIG.context.project_id,
             "service_id": text,
         }
         return f"```service_resource_graph\n{data}\n```"
@@ -200,7 +185,7 @@ class ConstructServiceTool(BaseTool):
     name = "construct_service"
     description = (
         "Construct a service for deployment in Seal system."
-        'Input to the tool should be a json string with 3 keys: "user_query", "existing_services", and "related_template".'
+        'Input to the tool should be a json with 3 keys: "user_query", "existing_services", and "related_template".'
         'The value of "user_query" should be the description of a deployment task.'
         'On creation, the value of "existing_services" should be all existing services in json format.'
         'On upgrade, the value of "existing_services" should only contain the service about to upgrade.'
@@ -221,7 +206,7 @@ class ConstructServiceTool(BaseTool):
             template=CONSTRUCT_SERVICE_PROMPT,
             input_variables=["query"],
             partial_variables={
-                "context": json.dumps(config.Config.context.__dict__),
+                "context": json.dumps(config.CONFIG.context.__dict__),
                 "existing_services": json.dumps(existing_services),
                 "related_template": json.dumps(related_template),
             },
