@@ -15,6 +15,7 @@ TODO
 - Diagnose: find flaws and ask AI to fix.
 - Safeguard: any action involving state changes requires human approval.
 - Other operations: view logs, access terminal to debug, etc.
+- Multi language support: It's not limited to English. Operate with the natural language you prefer.
 
 ## Run
 
