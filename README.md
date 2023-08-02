@@ -26,13 +26,14 @@ TODO
 
 **Prerequisite:** docker installed.
 
+1. Run
 ```
-docker run -it \
--e OPENAI_API_KEY=${OPENAI_API_KEY} \
--e SEAL_URL=${SEAL_URL} \
--e SEAL_API_KEY=${SEAL_API_KEY} \
--e VERBOSE=${VERBOSE} \
-appilot
+mv .env.example .env
+```
+2. Fill in the `.env` file
+3. Run
+```
+docker run -it --env-file .env appilot
 ```
 
 ### Run without Docker
@@ -45,16 +46,12 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
-2. Set envvars
+2. Run
 ```
-export OPENAI_API_KEY=<your-key>
-export SEAL_URL=<your-url>
-export SEAL_API_KEY=<your-key>
-export VERBOSE=1
+mv .env.example .env
 ```
-
-3. Run
+3. Fill in the `.env` file
+4. Run
 ```
 python app.py
 ```

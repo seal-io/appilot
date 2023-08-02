@@ -1,6 +1,7 @@
 import json
 import os
 from attr import dataclass
+from dotenv import load_dotenv
 
 from seal.client import SealClient
 
@@ -25,6 +26,7 @@ Config: _config
 
 
 def initConfig():
+    load_dotenv()
     openai_api_key = os.getenv("OPENAI_API_KEY")
     seal_api_key = os.getenv("SEAL_API_KEY")
     seal_url = os.getenv("SEAL_URL")
@@ -39,8 +41,6 @@ def initConfig():
     context = _default_context(seal_url, seal_api_key)
     global Config
     Config = _config(openai_api_key, seal_api_key, seal_url, context)
-    cfgs = json.dumps(Config.context.__dict__)
-    print(cfgs)
 
 
 def updateContext(context: _context):

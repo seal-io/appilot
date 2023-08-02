@@ -6,12 +6,12 @@ from utils import utils
 from agent.agent import create_seal_agent
 from langchain.memory import ConversationBufferMemory
 
+initConfig()
+
 llm = ChatOpenAI(
     model_name="gpt-4",
     temperature=0.0,
 )
-
-initConfig()
 
 seal_client = SealClient(
     config.Config.seal_url,
