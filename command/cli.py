@@ -40,8 +40,10 @@ def run():
     seal_agent = setup_agent()
 
     print(text.get("welcome"))
-    user_query = input(">")
+    user_query = None
     while user_query != "exit":
+        user_query = input(">")
+        if not user_query.strip():
+            continue
         result = seal_agent.run(user_query)
         utils.print_ai_response(result)
-        user_query = input(">")
