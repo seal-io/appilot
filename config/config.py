@@ -1,3 +1,4 @@
+from utils import utils
 import os
 
 from seal.client import SealClient
@@ -16,36 +17,47 @@ class Config(BaseModel):
     openai_api_key: str
     seal_api_key: str
     seal_url: str
-    natural_language: str = "English"
+    natural_language: str
+    show_reasoning: bool
+    verbose: bool
     context: Context
 
 
 CONFIG: Config
 
 
-def initConfig():
+def init():
     load_dotenv()
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    seal_api_key = os.getenv("SEAL_API_KEY")
-    seal_url = os.getenv("SEAL_URL")
-    natural_language = os.getenv("NATURAL_LANGUAGE")
+    openai_api_key =  utils.get_env("OPENAI_API_KEY")
+    seal_api_key =  utils.get_env("SEAL_API_KEY")
+    seal_url =  utils.get_env("SEAL_URL")
+    natural_language = utils.get_env("NATURAL_LANGUAGE","English")
+    show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
+    verbose = utils.get_env_bool("VERBOSE", False)
 
-    if seal_url is None:
+    if not seal_url:
         raise Exception("SEAL_URL is not set")
-    if seal_api_key is None:
+    if not seal_api_key:
         raise Exception("SEAL_API_KEY is not set")
-    if openai_api_key is None:
+    if not openai_api_key:
         raise Exception("OPENAI_API_KEY is not set")
 
 
     global CONFIG
     context = _default_context(seal_url, seal_api_key)
-    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url, context=context)
-    if natural_language is not None and natural_language.strip():
-        CONFIG.natural_language = natural_language
+    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url,natural_language=natural_language,show_reasoning=show_reasoning,verbose=verbose, context=context)
 
 
-def updateContext(context: Context):
+def set_verbose(verbose: bool):
+    global CONFIG
+    CONFIG.verbose = verbose
+
+
+def set_show_reasoning(show_reasoning: bool):
+    global CONFIG
+    CONFIG.show_reasoning = show_reasoning
+
+def update_context(context: Context):
     global CONFIG
     CONFIG.context = context
 

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from i18n import text
 from utils import utils
+from config import config
 
 from langchain.callbacks.base import BaseCallbackHandler,LLMManagerMixin
 from langchain.schema.output import LLMResult
@@ -48,7 +49,7 @@ class PrintReasoningCallbackHandler(BaseCallbackHandler):
         tags: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> None:
-        if not utils.show_reasoning():
+        if not config.CONFIG.show_reasoning:
             return 
         
         generation_text = response.generations[0][0].text

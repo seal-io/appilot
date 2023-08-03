@@ -51,7 +51,7 @@ class ChangeContextTool(BaseTool):
         if "environment_id" not in context:
             raise Exception("Environment not found")
 
-        config.updateContext(context)
+        config.update_context(context)
 
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""

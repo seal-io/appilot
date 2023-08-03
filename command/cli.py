@@ -13,7 +13,7 @@ from langchain.memory import ConversationBufferMemory
 import colorama
 
 def setup_agent() -> Any:
-    config.initConfig()
+    config.init()
     colorama.init()
 
     llm = ChatOpenAI(
@@ -33,7 +33,7 @@ def setup_agent() -> Any:
     memory = ConversationBufferMemory(memory_key="chat_history")
 
     return create_seal_agent(
-        seal_client, llm, shared_memory=memory, verbose=utils.verbose()
+        seal_client, llm, shared_memory=memory, verbose=config.CONFIG.verbose
     )
 
 def run():
@@ -41,9 +41,11 @@ def run():
 
     print(text.get("welcome"))
     user_query = None
-    while user_query != "exit":
+    while True:
         user_query = input(">")
         if not user_query.strip():
             continue
+        elif user_query == "exit":
+            break
         result = seal_agent.run(user_query)
         utils.print_ai_response(result)
