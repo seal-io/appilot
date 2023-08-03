@@ -9,9 +9,9 @@ FORMAT_INSTRUCTIONS_TEMPLATE = """To use a tool, please use the following format
 
 ```
 Thought: Do I need to use a tool? Yes
-Reason: the reason you need to use a tool(in {natural_language})
 Action: the action to take, should be one of [{{tool_names}}]
 Action Input: the input to the action
+Reason: the reason you use this tool(in {natural_language})
 Observation: the result of the action
 ```
 

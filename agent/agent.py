@@ -1,20 +1,12 @@
 from typing import Any, Dict, Optional
 
-from langchain.agents.agent import AgentExecutor
+from config import config
+from seal.client import SealClient
+from utils import utils
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
     FORMAT_INSTRUCTIONS_TEMPLATE,
 )
-from langchain.agents.conversational.base import ConversationalAgent
-from langchain.agents import load_tools
-from langchain.callbacks.base import BaseCallbackManager
-from langchain.chains.llm import LLMChain
-from langchain.memory import ReadOnlySharedMemory
-from langchain.schema.language_model import BaseLanguageModel
-from langchain.agents import load_tools
-from config import config
-from seal.client import SealClient
-from utils import utils
 from tools.manage_service.tool import (
     ConstructServiceTool,
     GetServicesTool,
@@ -35,6 +27,13 @@ from tools.manage_environment.tool import (
 from tools.manage_project.tool import ListProjectsTool
 from tools.manage_template.tool import MatchTemplateTool, GetTemplateSchemaTool
 
+from langchain.agents.agent import AgentExecutor
+from langchain.agents.conversational.base import ConversationalAgent
+from langchain.callbacks.base import BaseCallbackManager
+from langchain.chains.llm import LLMChain
+from langchain.memory import ReadOnlySharedMemory
+from langchain.schema.language_model import BaseLanguageModel
+from langchain.tools.human.tool import HumanInputRun
 
 def create_seal_agent(
     seal_client: SealClient,
@@ -47,9 +46,8 @@ def create_seal_agent(
 ) -> AgentExecutor:
     """Instantiate planner for a given task."""
 
-    tools = load_tools(["human"], llm)
-    tools.extend(
-        [
+    tools = [
+            HumanInputRun(),
             CurrentContextTool(),
             ChangeContextTool(seal_client=seal_client),
             ListProjectsTool(seal_client=seal_client),
@@ -68,7 +66,6 @@ def create_seal_agent(
             GetServiceAccessEndpointsTool(seal_client=seal_client),
             GetServiceDependencyGraphTool(seal_client=seal_client),
         ]
-    )
 
     format_instructions=FORMAT_INSTRUCTIONS_TEMPLATE.format(natural_language=config.CONFIG.natural_language)
     prompt = ConversationalAgent.create_prompt(
@@ -76,7 +73,6 @@ def create_seal_agent(
         prefix=AGENT_PROMPT_PREFIX,
         format_instructions=format_instructions,
     )
-
 
     agent = ConversationalAgent(
         llm_chain=LLMChain(llm=llm, prompt=prompt, verbose=utils.verbose()),

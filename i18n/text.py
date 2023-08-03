@@ -1,7 +1,8 @@
 import json
-from langchain.schema.language_model import BaseLanguageModel
 
 from config import config
+
+from langchain.schema.language_model import BaseLanguageModel
 
 prompt = """
 Translate the following json map to {language}. Keep the keys unchanged.
@@ -12,8 +13,12 @@ RESULT:
 """
 
 system_messages = {
-    "welcome": "What can I help?",
+    "welcome": "Appilot: What can I help?",
+    "ai_reasoning": "Appilot reasoning:",
+    "response_prefix": "Appilot:",
     "ask_approval":"""
+The following action requires approval:
+
 Input:
 {input}
 
@@ -35,7 +40,6 @@ def init_system_messages(llm:BaseLanguageModel):
     result = llm.predict(prompt.format(language=language,messages=system_messages_string))
     translated = json.loads(result)
     system_messages = translated
-    print(system_messages)
 
 def get(key):
     return system_messages[key]

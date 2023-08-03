@@ -1,8 +1,6 @@
 import json
-from typing import Optional
 from langchain import LLMChain
 
-from langchain.agents.tools import Tool
 from langchain.agents.tools import BaseTool
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
@@ -19,7 +17,7 @@ class MatchTemplateTool(BaseTool):
     name = "find_matching_template"
     description = (
         "Find a matching template for a deploy/upgrade task."
-        "Input should be a deploy/upgrade task."
+        "Input should be description of the task. For upgrade task, include previous template info."
         "Output matching template id, or None when no matching template found."
     )
     seal_client: SealClient

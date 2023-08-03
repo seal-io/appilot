@@ -1,6 +1,5 @@
 import json
 from typing import List
-from packaging.version import Version
 import requests
 import urllib3
 

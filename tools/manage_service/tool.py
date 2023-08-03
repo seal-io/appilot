@@ -141,7 +141,7 @@ class ListServiceResourcesTool(BaseTool):
     description = (
         "Get resources of a service. "
         "Helpful to know what resources a service consists of, what status they are in. "
-        "Input should be id of a service in plain string. "
+        "Input should be id of a service. "
         "Output resource objects in json format."
     )
     seal_client: SealClient

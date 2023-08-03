@@ -1,10 +1,9 @@
-import json
 import os
-from pydantic import BaseModel
-from dotenv import load_dotenv
 
 from seal.client import SealClient
 
+from pydantic import BaseModel
+from dotenv import load_dotenv
 
 class Context(BaseModel):
     project_id: str = ""
