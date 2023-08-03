@@ -1,20 +1,26 @@
-# appilot
+# Appilot
 Appilot`[ə'paɪlət]` stands for application-pilot.
-It's an experimental project that introduces GPTOps: operate your applications using GPT-like LLM.
+It is an experimental project that introduces GPTOps: operate your applications using GPT-like LLM.
 
 ## Demo
 
 ```
-TODO
+!!!TODO!!!
+- deploy nginx.
+- use helm to deploy an ELK stack.
+- deploy a llama2 instance on AWS.
+- upgrade and clean up a service.
+- clone an environment.
+- diagnose and resolve a service NotReady issue.
 ```
 
 ## Feature
 - Application management: deploy, upgrade, rollback, etc.
 - Environment management: clone, view topology, etc.
-- Hybrid infrastructure: works on kubernetes, VM, cloud, on-prem.
 - Diagnose: find flaws and ask AI to fix.
-- Safeguard: any action involving state changes requires human approval.
 - Other operations: view logs, access terminal to debug, etc.
+- Safeguard: any action involving state changes requires human approval.
+- Hybrid infrastructure: works on kubernetes, VM, cloud, on-prem.
 - Multi language support: It's not limited to English. Operate with the natural language you prefer.
 
 ## Run

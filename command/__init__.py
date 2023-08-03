@@ -1,1 +1,1 @@
-"""appilot commands."""
+"""Appilot commands."""
