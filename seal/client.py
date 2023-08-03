@@ -24,7 +24,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to list projects: {response.text}")
+            return f"Failed to list projects: {response.text}"
 
         return response.json()["items"]
 
@@ -42,7 +42,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to list environments: {response.text}")
+            return f"Failed to list environments: {response.text}"
 
         return response.json()["items"]
 
@@ -56,7 +56,7 @@ class SealClient:
         try:
             id_list = json.loads(ids)
         except json.JSONDecodeError as e:
-            raise e
+            return f"Failed to decode ids: {e}"
 
         body = {"ids": id_list}
         response = requests.delete(
@@ -67,7 +67,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to delete environment: {response.text}")
+            return f"Failed to delete environment: {response.text}"
 
         return response.text
 
@@ -86,9 +86,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(
-                f"Failed to get environment dependency graph: {response.text}"
-            )
+            return f"Failed to get environment dependency graph: {response.text}"
 
         return response.text
 
@@ -108,7 +106,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to list services: {response.text}")
+            return f"Failed to list services: {response.text}"
 
         return response.json()["items"]
 
@@ -121,7 +119,7 @@ class SealClient:
             if service["name"] == service_name:
                 return service
 
-        raise Exception(f"service {service_name} not found")
+        return f"service {service_name} not found"
 
     def create_service(self, project_id: str, environment_id: str, data):
         """Create a service in a project and environment."""
@@ -139,7 +137,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 201:
-            raise Exception(f"Failed to create service: {response.text}")
+            return f"Failed to create service: {response.text}"
 
         return response.text
 
@@ -165,7 +163,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to update service: {response.text}")
+            return f"Failed to update service: {response.text}"
 
         return response.text
 
@@ -179,7 +177,7 @@ class SealClient:
         try:
             id_list = json.loads(ids)
         except json.JSONDecodeError as e:
-            raise e
+            return f"Failed to decode ids: {e}"
 
         body = {"ids": id_list}
         response = requests.delete(
@@ -190,7 +188,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to delete service: {response.text}")
+            return f"Failed to delete service: {response.text}"
 
         return response.text
 
@@ -209,7 +207,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to get service access endpoints: {response.text}")
+            return f"Failed to get service access endpoints: {response.text}"
 
         return response.text
 
@@ -229,7 +227,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to get service resources: {response.text}")
+            return f"Failed to get service resources: {response.text}"
 
         return response.json()["items"]
 
@@ -244,7 +242,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to list templates: {response.text}")
+            return f"Failed to list templates: {response.text}"
 
         templates = response.json()["items"]
         for template in templates:
@@ -265,7 +263,7 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            raise Exception(f"Failed to list template versions: {response.text}")
+            return f"Failed to list template versions: {response.text}"
 
         template_versions = response.json()["items"]
         if len(template_versions) == 0:
