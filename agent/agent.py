@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 from config import config
 from seal.client import SealClient
 from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
-from utils import utils
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
     FORMAT_INSTRUCTIONS_TEMPLATE,

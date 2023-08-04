@@ -46,6 +46,9 @@ install-dependencies:
 farewell:
 	@echo -e "$(COLOR_GREEN)All done!$(COLOR_RESET)"
 
+#Defines a target named lint. This targeet will do pylint.
+lint:
+	git ls-files '*.py' | xargs pylint
 #Defines a target named run. This target will run Appilot.
 run:
 	@echo -e "$(COLOR_CYAN)Running Appilot...$(COLOR_RESET)" && \
