@@ -8,7 +8,8 @@ from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from tools.base.tools import RequireApprovalTool
 from tools.manage_service.prompt import (
-    CONSTRUCT_SERVICE_PROMPT,
+    CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
+    CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
 )
 
 
@@ -196,35 +197,89 @@ class GetServiceResourceLogsTool(BaseTool):
         )
 
 
-class ConstructServiceTool(BaseTool):
+class ConstructServiceToCreateTool(BaseTool):
     """Construct a service for deployment in Seal system."""
 
-    name = "construct_service"
+    name = "construct_service_to_create"
     description = (
-        "Construct a service for deployment in Seal system."
-        'Input to the tool should be a json with 3 keys: "user_query", "existing_services", and "related_template".'
+        "Construct a service for creation in Seal system."
+        'Input to the tool should be a json with 3 keys: "user_query" and "related_template_id".'
         'The value of "user_query" should be the description of a deployment task.'
-        'On creation, the value of "existing_services" should be all existing services in json format.'
-        'On upgrade, the value of "existing_services" should only contain the service about to upgrade.'
-        'The value of "related_template" should be related Seal template with version and schema in json format.'
-        "The output can be passed to an API controller that can format it into web request and return the response."
+        'The value of "related_template_id" should be id of a Seal template related to the deployment task.'
+        "The output is a service object in json. It will be used in the creation of a service."
     )
     llm: BaseLanguageModel
+    seal_client: SealClient
 
     def _run(self, text: str) -> str:
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
             raise e
+
         query = data.get("user_query")
-        existing_services = data.get("existing_services")
-        related_template = data.get("related_template")
+        template_id = data.get("related_template_id")
+
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+        existing_services = self.seal_client.list_services(
+            project_id, environment_id
+        )
+        related_template = self.seal_client.get_template_version(template_id)
+
         prompt = PromptTemplate(
-            template=CONSTRUCT_SERVICE_PROMPT,
+            template=CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
             input_variables=["query"],
             partial_variables={
                 "context": json.dumps(config.CONFIG.context.__dict__),
                 "existing_services": json.dumps(existing_services),
+                "related_template": json.dumps(related_template),
+            },
+        )
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        return chain.run(json.dumps(query)).strip()
+
+
+class ConstructServiceToUpdateTool(BaseTool):
+    """Construct a service for upgrade in Seal system."""
+
+    name = "construct_service_to_update"
+    description = (
+        "Construct a service for update in Seal system."
+        'Input to the tool should be a json with 3 keys: "user_query", "service_name" and "related_template_id".'
+        'The value of "user_query" should be the description of a deployment task.'
+        'The value of "service_name" should be name of the service about to update.'
+        'The value of "related_template_id" should be id of a Seal template related to the deployment task.'
+        "The output is a service object in json. It will be used in the update of a service."
+    )
+    llm: BaseLanguageModel
+    seal_client: SealClient
+
+    def _run(self, text: str) -> str:
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise e
+
+        query = data.get("user_query")
+        service_name = data.get("service_name")
+        template_id = data.get("related_template_id")
+
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+        related_template = self.seal_client.get_template_version(template_id)
+        current_service = self.seal_client.get_service_by_name(
+            project_id=project_id,
+            environment_id=environment_id,
+            service_name=service_name,
+        )
+
+        prompt = PromptTemplate(
+            template=CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
+            input_variables=["query"],
+            partial_variables={
+                "context": json.dumps(config.CONFIG.context.__dict__),
+                "current_service": json.dumps(current_service),
                 "related_template": json.dumps(related_template),
             },
         )

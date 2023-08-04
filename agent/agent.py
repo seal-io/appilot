@@ -8,7 +8,8 @@ from agent.prompt import (
     FORMAT_INSTRUCTIONS_TEMPLATE,
 )
 from tools.manage_service.tool import (
-    ConstructServiceTool,
+    ConstructServiceToCreateTool,
+    ConstructServiceToUpdateTool,
     GetServicesTool,
     CreateServiceTool,
     DeleteServicesTool,
@@ -61,7 +62,8 @@ def create_seal_agent(
         GetEnvironmentDependencyGraphTool(seal_client=seal_client),
         MatchTemplateTool(llm=llm, seal_client=seal_client),
         GetTemplateSchemaTool(seal_client=seal_client),
-        ConstructServiceTool(llm=llm),
+        ConstructServiceToCreateTool(llm=llm, seal_client=seal_client),
+        ConstructServiceToUpdateTool(llm=llm, seal_client=seal_client),
         GetServicesTool(seal_client=seal_client),
         ListServicesTool(seal_client=seal_client),
         CreateServiceTool(seal_client=seal_client),
