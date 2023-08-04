@@ -70,7 +70,9 @@ class CreateServiceTool(RequireApprovalTool):
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.seal_client.create_service(project_id, environment_id, text)
+        return self.seal_client.create_service(
+            project_id, environment_id, text
+        )
 
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -91,7 +93,9 @@ class UpdateServiceTool(RequireApprovalTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.seal_client.update_service(project_id, environment_id, text)
+        return self.seal_client.update_service(
+            project_id, environment_id, text
+        )
 
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -102,7 +106,9 @@ class DeleteServicesTool(RequireApprovalTool):
     """Tool to delete one or multiple services."""
 
     name = "delete_services"
-    description = "Delete one or multiple services. Input should be ids of services."
+    description = (
+        "Delete one or multiple services. Input should be ids of services."
+    )
     seal_client: SealClient
 
     def _run(self, query: str) -> str:
@@ -221,7 +227,9 @@ class GetServiceResourceLogsTool(BaseTool):
         key = input["key"]
 
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.get_service_resource_logs(project_id, service_resource_id, key)
+        return self.seal_client.get_service_resource_logs(
+            project_id, service_resource_id, key
+        )
 
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""

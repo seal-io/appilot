@@ -84,7 +84,9 @@ class SealClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get environment dependency graph: {response.text}"
+            return (
+                f"Failed to get environment dependency graph: {response.text}"
+            )
 
         return response.text
 
@@ -229,7 +231,9 @@ class SealClient:
 
         return response.json()["items"]
 
-    def get_service_resource_keys(self, project_id: str, service_resource_id: str):
+    def get_service_resource_keys(
+        self, project_id: str, service_resource_id: str
+    ):
         """Get keys of a service resource."""
 
         params = {
@@ -238,7 +242,8 @@ class SealClient:
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + f"/v1/service-resources/{service_resource_id}/keys",
+            url=self.api_url
+            + f"/v1/service-resources/{service_resource_id}/keys",
             params=params,
             headers=headers,
             **self.request_args,
@@ -248,7 +253,9 @@ class SealClient:
 
         return response.text
 
-    def get_service_resource_logs(self, project_id: str, service_resource_id: str, key: str):
+    def get_service_resource_logs(
+        self, project_id: str, service_resource_id: str, key: str
+    ):
         """Get logs of a service resource."""
 
         params = {
@@ -258,7 +265,8 @@ class SealClient:
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + f"/v1/service-resources/{service_resource_id}/logs",
+            url=self.api_url
+            + f"/v1/service-resources/{service_resource_id}/logs",
             params=params,
             headers=headers,
             **self.request_args,

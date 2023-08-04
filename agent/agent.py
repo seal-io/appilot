@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from config import config
 from seal.client import SealClient
-from tools.reasoning.tool import ShowReasoningTool,HideReasoningTool
+from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
 from utils import utils
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
@@ -38,6 +38,7 @@ from langchain.chains.llm import LLMChain
 from langchain.memory import ReadOnlySharedMemory
 from langchain.schema.language_model import BaseLanguageModel
 
+
 def create_seal_agent(
     seal_client: SealClient,
     llm: BaseLanguageModel,
@@ -50,31 +51,33 @@ def create_seal_agent(
     """Instantiate planner for a given task."""
 
     tools = [
-            HumanTool(),
-            ShowReasoningTool(),
-            HideReasoningTool(),
-            CurrentContextTool(),
-            ChangeContextTool(seal_client=seal_client),
-            ListProjectsTool(seal_client=seal_client),
-            ListEnvironmentsTool(seal_client=seal_client),
-            DeleteEnvironmentsTool(seal_client=seal_client),
-            GetEnvironmentDependencyGraphTool(seal_client=seal_client),
-            MatchTemplateTool(llm=llm, seal_client=seal_client),
-            GetTemplateSchemaTool(seal_client=seal_client),
-            ConstructServiceTool(llm=llm),
-            GetServicesTool(seal_client=seal_client),
-            ListServicesTool(seal_client=seal_client),
-            CreateServiceTool(seal_client=seal_client),
-            UpdateServiceTool(seal_client=seal_client),
-            DeleteServicesTool(seal_client=seal_client),
-            ListServiceResourcesTool(seal_client=seal_client),
-            GetServiceResourceKeysTool(seal_client=seal_client),
-            GetServiceResourceLogsTool(seal_client=seal_client),
-            GetServiceAccessEndpointsTool(seal_client=seal_client),
-            GetServiceDependencyGraphTool(seal_client=seal_client),
-        ]
+        HumanTool(),
+        ShowReasoningTool(),
+        HideReasoningTool(),
+        CurrentContextTool(),
+        ChangeContextTool(seal_client=seal_client),
+        ListProjectsTool(seal_client=seal_client),
+        ListEnvironmentsTool(seal_client=seal_client),
+        DeleteEnvironmentsTool(seal_client=seal_client),
+        GetEnvironmentDependencyGraphTool(seal_client=seal_client),
+        MatchTemplateTool(llm=llm, seal_client=seal_client),
+        GetTemplateSchemaTool(seal_client=seal_client),
+        ConstructServiceTool(llm=llm),
+        GetServicesTool(seal_client=seal_client),
+        ListServicesTool(seal_client=seal_client),
+        CreateServiceTool(seal_client=seal_client),
+        UpdateServiceTool(seal_client=seal_client),
+        DeleteServicesTool(seal_client=seal_client),
+        ListServiceResourcesTool(seal_client=seal_client),
+        GetServiceResourceKeysTool(seal_client=seal_client),
+        GetServiceResourceLogsTool(seal_client=seal_client),
+        GetServiceAccessEndpointsTool(seal_client=seal_client),
+        GetServiceDependencyGraphTool(seal_client=seal_client),
+    ]
 
-    format_instructions=FORMAT_INSTRUCTIONS_TEMPLATE.format(natural_language=config.CONFIG.natural_language)
+    format_instructions = FORMAT_INSTRUCTIONS_TEMPLATE.format(
+        natural_language=config.CONFIG.natural_language
+    )
     prompt = ConversationalAgent.create_prompt(
         tools,
         prefix=AGENT_PROMPT_PREFIX,
@@ -82,7 +85,9 @@ def create_seal_agent(
     )
 
     agent = ConversationalAgent(
-        llm_chain=LLMChain(llm=llm, prompt=prompt, verbose=config.CONFIG.verbose),
+        llm_chain=LLMChain(
+            llm=llm, prompt=prompt, verbose=config.CONFIG.verbose
+        ),
         allowed_tools=[tool.name for tool in tools],
         **kwargs,
     )

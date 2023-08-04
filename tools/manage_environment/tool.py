@@ -10,7 +10,9 @@ class ListEnvironmentsTool(BaseTool):
     """Tool to list environments."""
 
     name = "list_environments"
-    description = "List environments of a project. Input should be a project id."
+    description = (
+        "List environments of a project. Input should be a project id."
+    )
     seal_client: SealClient
 
     def _run(self, text: str) -> str:
@@ -26,9 +28,7 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
     """Tool to delete environments."""
 
     name = "delete_environments"
-    description = (
-        "Delete one or multiple environments. Input should be ids of environments."
-    )
+    description = "Delete one or multiple environments. Input should be ids of environments."
     seal_client: SealClient
 
     def _run(self, text: str) -> str:

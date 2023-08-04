@@ -1,4 +1,3 @@
-
 from typing import Any
 
 from callbacks import handlers
@@ -11,6 +10,7 @@ from agent.agent import create_seal_agent
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 import colorama
+
 
 def setup_agent() -> Any:
     config.init()
@@ -35,6 +35,7 @@ def setup_agent() -> Any:
     return create_seal_agent(
         seal_client, llm, shared_memory=memory, verbose=config.CONFIG.verbose
     )
+
 
 def run():
     seal_agent = setup_agent()

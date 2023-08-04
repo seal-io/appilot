@@ -43,7 +43,9 @@ class ChangeContextTool(BaseTool):
         if "project_id" not in context:
             raise Exception("Project not found")
 
-        environments = self.seal_client.list_environments(context["project_id"])
+        environments = self.seal_client.list_environments(
+            context["project_id"]
+        )
         for environment in environments:
             if environment["name"] == context["environment_name"]:
                 context["environment_id"] = environment["id"]

@@ -6,6 +6,7 @@ from seal.client import SealClient
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+
 class Context(BaseModel):
     project_id: str = ""
     project_name: str = ""
@@ -29,10 +30,10 @@ CONFIG: Config
 
 def init():
     load_dotenv()
-    openai_api_key =  utils.get_env("OPENAI_API_KEY")
-    seal_api_key =  utils.get_env("SEAL_API_KEY")
-    seal_url =  utils.get_env("SEAL_URL")
-    natural_language = utils.get_env("NATURAL_LANGUAGE","English")
+    openai_api_key = utils.get_env("OPENAI_API_KEY")
+    seal_api_key = utils.get_env("SEAL_API_KEY")
+    seal_url = utils.get_env("SEAL_URL")
+    natural_language = utils.get_env("NATURAL_LANGUAGE", "English")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
     skip_tls_verify = utils.get_env_bool("SKIP_TLS_VERIFY", False)
@@ -49,7 +50,16 @@ def init():
 
     global CONFIG
     context = _default_context(seal_url, seal_api_key)
-    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url,natural_language=natural_language,show_reasoning=show_reasoning,verbose=verbose,skip_tls_verify=skip_tls_verify, context=context)
+    CONFIG = Config(
+        openai_api_key=openai_api_key,
+        seal_api_key=seal_api_key,
+        seal_url=seal_url,
+        natural_language=natural_language,
+        show_reasoning=show_reasoning,
+        verbose=verbose,
+        skip_tls_verify=skip_tls_verify,
+        context=context,
+    )
 
 
 def set_verbose(verbose: bool):
@@ -60,6 +70,7 @@ def set_verbose(verbose: bool):
 def set_show_reasoning(show_reasoning: bool):
     global CONFIG
     CONFIG.show_reasoning = show_reasoning
+
 
 def update_context(context: Context):
     global CONFIG

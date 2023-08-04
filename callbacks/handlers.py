@@ -5,10 +5,11 @@ from i18n import text
 from utils import utils
 from config import config
 
-from langchain.callbacks.base import BaseCallbackHandler,LLMManagerMixin
+from langchain.callbacks.base import BaseCallbackHandler, LLMManagerMixin
 from langchain.schema.output import LLMResult
 from langchain.schema.agent import AgentAction, AgentFinish
 from langchain.schema.output import LLMResult
+
 
 class HumanRejectedException(Exception):
     """Exception to raise when a person manually review and rejects a value."""
@@ -28,16 +29,18 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> Any:
-        if not self._approve(input_str,serialized):
+        if not self._approve(input_str, serialized):
             raise HumanRejectedException(
                 f"Inputs {input_str} to tool {serialized} were rejected."
             )
 
     def _approve(self, _input: str, serialized: Dict[str, Any]) -> bool:
         message = text.get("ask_approval")
-        resp = input(message.format(input=_input, tool_name=serialized["name"]))
+        resp = input(
+            message.format(input=_input, tool_name=serialized["name"])
+        )
         return resp.lower() in ("yes", "y")
-    
+
 
 class PrintReasoningCallbackHandler(BaseCallbackHandler):
     def on_llm_end(
@@ -50,8 +53,8 @@ class PrintReasoningCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         if not config.CONFIG.show_reasoning:
-            return 
-        
+            return
+
         generation_text = response.generations[0][0].text
         lines = generation_text.splitlines()
         reason_prompt_prefix = "Reason:"
@@ -61,10 +64,9 @@ class PrintReasoningCallbackHandler(BaseCallbackHandler):
                 utils.print_ai_reasoning(reason_text)
                 break
         """Print AI reasoning."""
-    
+
 
 class DebugCallbackHandler(BaseCallbackHandler, LLMManagerMixin):
-
     def on_llm_end(
         self,
         response: LLMResult,
@@ -76,7 +78,7 @@ class DebugCallbackHandler(BaseCallbackHandler, LLMManagerMixin):
     ) -> None:
         print("on_llm_end")
         """Run when LLM ends running."""
-    
+
     def on_llm_new_token(
         self,
         token: str,
@@ -88,7 +90,6 @@ class DebugCallbackHandler(BaseCallbackHandler, LLMManagerMixin):
     ) -> None:
         print("on_llm_new_token")
         """Run on new LLM token. Only available when streaming is enabled."""
-
 
     def on_llm_error(
         self,
