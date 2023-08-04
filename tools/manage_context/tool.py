@@ -13,10 +13,6 @@ class CurrentContextTool(BaseTool):
     def _run(self, query: str) -> str:
         return json.dumps(config.CONFIG.context.__dict__)
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class ChangeContextTool(BaseTool):
     """Tool to change project and environment context."""
@@ -54,7 +50,3 @@ class ChangeContextTool(BaseTool):
             raise Exception("Environment not found")
 
         config.update_context(context)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")

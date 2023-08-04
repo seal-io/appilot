@@ -14,7 +14,3 @@ class ListProjectsTool(BaseTool):
     def _run(self, query: str) -> str:
         projects = self.seal_client.list_projects()
         return json.dumps(projects)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("custom_search does not support async")

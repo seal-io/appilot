@@ -25,10 +25,6 @@ class ListServicesTool(BaseTool):
         services = self.seal_client.list_services(project_id, environment_id)
         return json.dumps(services)
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class GetServicesTool(BaseTool):
     """Tool to get a service."""
@@ -44,10 +40,6 @@ class GetServicesTool(BaseTool):
             project_id, environment_id, query
         )
         return json.dumps(service)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class CreateServiceTool(RequireApprovalTool):
@@ -74,10 +66,6 @@ class CreateServiceTool(RequireApprovalTool):
             project_id, environment_id, text
         )
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("custom_search does not support async")
-
 
 class UpdateServiceTool(RequireApprovalTool):
     """Tool to update a service."""
@@ -97,10 +85,6 @@ class UpdateServiceTool(RequireApprovalTool):
             project_id, environment_id, text
         )
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class DeleteServicesTool(RequireApprovalTool):
     """Tool to delete one or multiple services."""
@@ -114,10 +98,6 @@ class DeleteServicesTool(RequireApprovalTool):
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         return self.seal_client.delete_services(project_id, query)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class GetServiceAccessEndpointsTool(BaseTool):
@@ -135,10 +115,6 @@ class GetServiceAccessEndpointsTool(BaseTool):
         project_id = config.CONFIG.context.project_id
         return self.seal_client.get_service_access_endpoints(project_id, text)
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class ListServiceResourcesTool(BaseTool):
     """Tool to get resources of a service."""
@@ -155,10 +131,6 @@ class ListServiceResourcesTool(BaseTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         return self.seal_client.list_service_resources(project_id, text)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class GetServiceDependencyGraphTool(BaseTool):
@@ -180,10 +152,6 @@ class GetServiceDependencyGraphTool(BaseTool):
         }
         return f"```service_resource_graph\n{data}\n```"
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class GetServiceResourceKeysTool(BaseTool):
     """Tool to get keys of a service resource."""
@@ -200,10 +168,6 @@ class GetServiceResourceKeysTool(BaseTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         return self.seal_client.get_service_resource_keys(project_id, text)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class GetServiceResourceLogsTool(BaseTool):
@@ -230,10 +194,6 @@ class GetServiceResourceLogsTool(BaseTool):
         return self.seal_client.get_service_resource_logs(
             project_id, service_resource_id, key
         )
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class ConstructServiceTool(BaseTool):
@@ -270,6 +230,3 @@ class ConstructServiceTool(BaseTool):
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
         return chain.run(json.dumps(query)).strip()
-
-    async def _arun(self, text: str) -> str:
-        raise NotImplementedError()

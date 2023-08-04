@@ -19,10 +19,6 @@ class ListEnvironmentsTool(BaseTool):
         environments = self.seal_client.list_environments(text)
         return json.dumps(environments)
 
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
-
 
 class DeleteEnvironmentsTool(RequireApprovalTool):
     """Tool to delete environments."""
@@ -34,10 +30,6 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         return self.seal_client.delete_environments(project_id, text)
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
 
 
 class GetEnvironmentDependencyGraphTool(BaseTool):
@@ -59,7 +51,3 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
         }
         # graph_data = self.seal_client.get_environment_graph(project_id, text)
         return f"```service_graph\n{data}\n```"
-
-    async def _arun(self, query: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("async not supported")
