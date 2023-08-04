@@ -1,7 +1,6 @@
 import json
 from typing import List
 import requests
-import urllib3
 
 
 class SealClient:
@@ -11,7 +10,6 @@ class SealClient:
         self.api_url = api_url
         self.api_key = api_key
         self.request_args = kwargs
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def list_projects(self):
         """List projects."""

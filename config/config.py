@@ -20,6 +20,7 @@ class Config(BaseModel):
     natural_language: str
     show_reasoning: bool
     verbose: bool
+    skip_tls_verify: bool
     context: Context
 
 
@@ -34,6 +35,7 @@ def init():
     natural_language = utils.get_env("NATURAL_LANGUAGE","English")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
+    skip_tls_verify = utils.get_env_bool("SKIP_TLS_VERIFY", False)
 
     if not seal_url:
         raise Exception("SEAL_URL is not set")
@@ -42,10 +44,9 @@ def init():
     if not openai_api_key:
         raise Exception("OPENAI_API_KEY is not set")
 
-
     global CONFIG
     context = _default_context(seal_url, seal_api_key)
-    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url,natural_language=natural_language,show_reasoning=show_reasoning,verbose=verbose, context=context)
+    CONFIG = Config(openai_api_key=openai_api_key, seal_api_key=seal_api_key, seal_url=seal_url,natural_language=natural_language,show_reasoning=show_reasoning,verbose=verbose,skip_tls_verify=skip_tls_verify, context=context)
 
 
 def set_verbose(verbose: bool):
