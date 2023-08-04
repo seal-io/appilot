@@ -30,19 +30,17 @@ It is an experimental project that introduces GPTOps: operate your applications 
 **prerequistes:**
 
 - Get OpenAI API key with access to the gpt-4 model.
-- Install [Seal](https://github.com/seal-io/seal) and get the url and API key. Seal is an open source software that can be run by a docker run command. It serves as the engine for application management.
+- Install [Seal](https://github.com/seal-io/seal) and get the url and API key. Seal is an open source software that can be run by a docker command. It serves as the engine for application management.
 
 ### Run with Docker
 
 **Prerequisites:** `docker` installed.
 
-1. Fill in envfile by running:
+1. Fill in envfile by running the following command, then set variables in `.env` file.
 
 ```
 mv .env.example .env
 ```
-
-then set variables in `.env` file
 
 2. Run the following command:
 
@@ -54,13 +52,11 @@ docker run -it --env-file .env appilot
 
 **Prerequisites:** `python3` and `make` installed.
 
-1. Fill in envfile by running
+1. Fill in envfile by running the following command, then set variables in `.env` file.
 
 ```
 mv .env.example .env
 ```
-
-then set variables in `.env` file
 
 2. Run the following command to install. It will create a venv and install required dependencies.
 
@@ -68,7 +64,7 @@ then set variables in `.env` file
 make install
 ```
 
-3. Run Appilot:
+3. Run the following command:
 
 ```
 make run
