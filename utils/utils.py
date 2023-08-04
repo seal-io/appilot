@@ -3,6 +3,10 @@ import os
 from i18n import text
 
 from colorama import Fore, Style
+from rich.markdown import Markdown
+from rich.console import Console
+
+console = Console()
 
 def get_env(key: str, default: str = "") -> str:
     env = os.getenv(key)
@@ -21,4 +25,7 @@ def print_ai_reasoning(message):
     print(Fore.CYAN + text.get("ai_reasoning") + message + Style.RESET_ALL)
 
 def print_ai_response(message):
-    print(Fore.WHITE + text.get("response_prefix") + message + Style.RESET_ALL)
+    print(text.get("response_prefix"))
+    console.print(Markdown(message))
+    # print(Fore.WHITE + text.get("response_prefix") + Markdown(message) + Style.RESET_ALL)
+

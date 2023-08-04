@@ -2,7 +2,6 @@ AGENT_PROMPT_PREFIX = """You are an agent that assists with user queries against
 Some user queries can be resolved in a single API call, though some require several API calls.
 ID of service is a string that looks like a long number.
 Always use the construct_service tool before creating or updating a service.
-If the final result is suitable to show in table, use markdown table format.
 """
 
 FORMAT_INSTRUCTIONS_TEMPLATE = """To use a tool, please use the following format:
@@ -23,5 +22,7 @@ Reason: the reason you do not need to use a tool
 {{ai_prefix}}: [your response here]
 ```
 
+In the reponse, don't show project id and environment id. Unless user explicitly ask for it.
+Use markdown format for the response. If the data is suitable to show in table, use markdown table.
 Please print the response to human in {natural_language}.
 """

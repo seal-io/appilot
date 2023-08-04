@@ -17,6 +17,8 @@ from tools.manage_service.tool import (
     ListServicesTool,
     UpdateServiceTool,
     ListServiceResourcesTool,
+    GetServiceResourceKeysTool,
+    GetServiceResourceLogsTool,
     GetServiceDependencyGraphTool,
 )
 from tools.manage_context.tool import ChangeContextTool, CurrentContextTool
@@ -66,6 +68,8 @@ def create_seal_agent(
             UpdateServiceTool(seal_client=seal_client),
             DeleteServicesTool(seal_client=seal_client),
             ListServiceResourcesTool(seal_client=seal_client),
+            GetServiceResourceKeysTool(seal_client=seal_client),
+            GetServiceResourceLogsTool(seal_client=seal_client),
             GetServiceAccessEndpointsTool(seal_client=seal_client),
             GetServiceDependencyGraphTool(seal_client=seal_client),
         ]
