@@ -1,6 +1,5 @@
 
 from typing import Any
-import urllib3
 
 from callbacks import handlers
 from config import config
@@ -25,15 +24,10 @@ def setup_agent() -> Any:
 
     text.init_system_messages(llm)
 
-    tls_verify = True
-    if config.CONFIG.skip_tls_verify:
-        tls_verify = False
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
     seal_client = SealClient(
         config.CONFIG.seal_url,
         config.CONFIG.seal_api_key,
-        verify=tls_verify,
+        verify=(not config.CONFIG.skip_tls_verify),
     )
 
     memory = ConversationBufferMemory(memory_key="chat_history")

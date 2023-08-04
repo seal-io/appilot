@@ -1,5 +1,5 @@
 from utils import utils
-import os
+import urllib3
 
 from seal.client import SealClient
 
@@ -36,6 +36,9 @@ def init():
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
     skip_tls_verify = utils.get_env_bool("SKIP_TLS_VERIFY", False)
+
+    if skip_tls_verify:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     if not seal_url:
         raise Exception("SEAL_URL is not set")

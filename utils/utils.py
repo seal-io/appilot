@@ -25,7 +25,7 @@ def print_ai_reasoning(message):
     print(Fore.CYAN + text.get("ai_reasoning") + message + Style.RESET_ALL)
 
 def print_ai_response(message):
-    print(text.get("response_prefix"))
+    print(text.get("response_prefix"),end='')
     console.print(Markdown(message))
     # print(Fore.WHITE + text.get("response_prefix") + Markdown(message) + Style.RESET_ALL)
 
