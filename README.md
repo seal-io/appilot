@@ -45,7 +45,7 @@ mv .env.example .env
 2. Run the following command:
 
 ```
-docker run -it --env-file .env appilot
+docker run -it --env-file .env sealio/appilot:main
 ```
 
 ### Run locally in python virtual environment
