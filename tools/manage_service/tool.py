@@ -179,6 +179,55 @@ class GetServiceDependencyGraphTool(BaseTool):
         raise NotImplementedError("async not supported")
 
 
+class GetServiceResourceKeysTool(BaseTool):
+    """Tool to get keys of a service resource."""
+
+    name = "get_service_resource_keys"
+    description = (
+        "Get keys of a service resource. "
+        "Key is identity of a service resource's component. It is needed when you need logs or terminal access of a resource. "
+        "Input is id of a service resource."
+        "Output is keys in json format."
+    )
+    seal_client: SealClient
+
+    def _run(self, text: str) -> str:
+        project_id = config.CONFIG.context.project_id
+        return self.seal_client.get_service_resource_keys(project_id, text)
+
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("async not supported")
+
+
+class GetServiceResourceLogsTool(BaseTool):
+    """Tool to get logs of a service resource."""
+
+    name = "get_service_resource_logs"
+    description = (
+        "Get logs of a service resource. "
+        "Key is identity of a service resource's component. It is needed when you need logs or terminal access of a resource. "
+        'Input should be a json with 2 keys: "service_resource_id", "key".'
+        "Output is log text."
+    )
+    seal_client: SealClient
+
+    def _run(self, text: str) -> str:
+        try:
+            input = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise e
+        service_resource_id = input["service_resource_id"]
+        key = input["key"]
+
+        project_id = config.CONFIG.context.project_id
+        return self.seal_client.get_service_resource_logs(project_id, service_resource_id, key)
+
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("async not supported")
+
+
 class ConstructServiceTool(BaseTool):
     """Construct a service for deployment in Seal system."""
 

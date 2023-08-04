@@ -231,6 +231,45 @@ class SealClient:
 
         return response.json()["items"]
 
+    def get_service_resource_keys(self, project_id: str, service_resource_id: str):
+        """Get keys of a service resource."""
+
+        params = {
+            "projectID": project_id,
+        }
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+
+        response = requests.get(
+            url=self.api_url + f"/v1/service-resources/{service_resource_id}/keys",
+            params=params,
+            headers=headers,
+            **self.request_args,
+        )
+        if response.status_code != 200:
+            return f"Failed to get service resource keys: {response.text}"
+
+        return response.text
+
+    def get_service_resource_logs(self, project_id: str, service_resource_id: str, key: str):
+        """Get logs of a service resource."""
+
+        params = {
+            "projectID": project_id,
+            "key": key,
+        }
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+
+        response = requests.get(
+            url=self.api_url + f"/v1/service-resources/{service_resource_id}/logs",
+            params=params,
+            headers=headers,
+            **self.request_args,
+        )
+        if response.status_code != 200:
+            return f"Failed to get service resource logs: {response.text}"
+
+        return response.text
+
     def list_templates(self):
         """List templates."""
         headers = {"Authorization": f"Bearer {self.api_key}"}
