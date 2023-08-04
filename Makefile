@@ -40,7 +40,7 @@ upgrade-pip:
 install-dependencies:
 	@echo -e "$(COLOR_CYAN)Installing dependencies...$(COLOR_RESET)" && \
 	source .venv/bin/activate && \
-	pip install -e . >> /dev/null
+	pip install -r requirements.txt >> /dev/null
 
 #Defines a target named farewell. This target will print a farewell message.
 farewell:

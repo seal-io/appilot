@@ -1,4 +1,5 @@
 # Appilot
+
 Appilot`[ə'paɪlət]` stands for application-pilot.
 It is an experimental project that introduces GPTOps: operate your applications using GPT-like LLM.
 
@@ -15,6 +16,7 @@ It is an experimental project that introduces GPTOps: operate your applications 
 ```
 
 ## Feature
+
 - Application management: deploy, upgrade, rollback, etc.
 - Environment management: clone, view topology, etc.
 - Diagnose: find flaws and ask AI to fix.
@@ -26,39 +28,48 @@ It is an experimental project that introduces GPTOps: operate your applications 
 ## Run
 
 **prerequistes:**
-1. Get openai API key with access to the gpt-4 model.
-2. Install [Seal](https://github.com/seal-io/seal) and get the url and API key. Seal is an open source software that can be run by a docker run command. It serves as the engine for application management.
+
+- Get OpenAI API key with access to the gpt-4 model.
+- Install [Seal](https://github.com/seal-io/seal) and get the url and API key. Seal is an open source software that can be run by a docker run command. It serves as the engine for application management.
 
 ### Run with Docker
 
-**Prerequisite:** docker installed.
+**Prerequisites:** `docker` installed.
 
-1. Run
+1. Fill in envfile by running:
+
 ```
 mv .env.example .env
 ```
-2. Fill in the `.env` file
-3. Run
+
+then set variables in `.env` file
+
+2. Run the following command:
+
 ```
 docker run -it --env-file .env appilot
 ```
 
-### Run without Docker
+### Run locally in python virtual environment
 
-**Prerequisite:** python3 installed.
+**Prerequisites:** `python3` and `make` installed.
 
-1. Prepare venv
-```
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-2. Run
+1. Fill in envfile by running
+
 ```
 mv .env.example .env
 ```
-3. Fill in the `.env` file
-4. Run
+
+then set variables in `.env` file
+
+2. Run the following command to install. It will create a venv and install required dependencies.
+
 ```
-python app.py
+make install
+```
+
+3. Run Appilot:
+
+```
+make run
 ```
