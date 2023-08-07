@@ -177,8 +177,9 @@ class GetServiceResourceLogsTool(BaseTool):
     name = "get_service_resource_logs"
     description = (
         "Get logs of a service resource. "
-        "Key is identity of a service resource's component. It is needed when you need logs or terminal access of a resource. "
+        "Before using this tool, you should get keys of the resource first."
         'Input should be a json with 2 keys: "service_resource_id", "key".'
+        '"key" is identity of a service resource\'s component. It is required when you need logs or terminal access of a resource. '
         "Output is log text."
     )
     seal_client: SealClient
