@@ -11,14 +11,14 @@ from walrus.client import WalrusClient
 class MatchTemplateTool(BaseTool):
     """Find matching template useful for a deployment task.
     Input should be a deployment task.
-    Output matching template id.
+    Output matching template name.
     """
 
     name = "find_matching_template"
     description = (
         "Find a matching template for a deploy/upgrade task."
         "Input should be description of the task. For upgrade task, include previous template info."
-        "Output matching template id, or None when no matching template found."
+        "Output matching template name, or None when no matching template found."
     )
     walrus_client: WalrusClient
     llm: BaseLanguageModel
@@ -37,12 +37,12 @@ class MatchTemplateTool(BaseTool):
 
 
 class GetTemplateSchemaTool(BaseTool):
-    """Tool to get template version and schema given template id."""
+    """Tool to get template version and schema given template name."""
 
     name = "get_template_schema"
     description = (
-        "Get template version and schema given template id."
-        "Input should be a template id."
+        "Get template version and schema given template name."
+        "Input should be a template name."
         "Output template schema."
     )
     walrus_client: WalrusClient

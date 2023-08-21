@@ -266,11 +266,11 @@ class WalrusClient:
             del template["source"]
         return json.dumps(templates)
 
-    def get_template_version(self, id: str):
-        """Get latest template version given template id."""
+    def get_template_version(self, template: str):
+        """Get latest template version given template id or name."""
         response = requests.get(
-            url=self.api_url + f"/v1/templates/{id}/versions",
-            params={"templateID": id, "perPage": -1},
+            url=self.api_url + f"/v1/templates/{template}/versions",
+            params={"perPage": -1},
             headers=self.headers(),
             **self.request_args,
         )

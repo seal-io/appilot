@@ -100,7 +100,10 @@ class DeleteServicesTool(RequireApprovalTool):
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.walrus_client.delete_services(project_id, query)
+        environment_id = config.CONFIG.context.environment_id
+        return self.walrus_client.delete_services(
+            project_id, environment_id, query
+        )
 
 
 class GetServiceAccessEndpointsTool(BaseTool):
@@ -116,8 +119,9 @@ class GetServiceAccessEndpointsTool(BaseTool):
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         return self.walrus_client.get_service_access_endpoints(
-            project_id, text
+            project_id, environment_id, text
         )
 
 
@@ -135,7 +139,10 @@ class ListServiceResourcesTool(BaseTool):
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.walrus_client.list_service_resources(project_id, text)
+        environment_id = config.CONFIG.context.environment_id
+        return self.walrus_client.list_service_resources(
+            project_id, environment_id, text
+        )
 
 
 class GetServiceDependencyGraphTool(BaseTool):
@@ -165,14 +172,24 @@ class GetServiceResourceKeysTool(BaseTool):
     description = (
         "Get keys of a service resource. "
         "Key is identity of a service resource's component. It is needed when you need logs or terminal access of a resource. "
-        "Input is id of a service resource."
+        'Input should be a json with 2 keys: "service_id", "service_resource_id".'
         "Output is keys in json format."
     )
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
+        try:
+            input = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise e
+        service_id = input["service_id"]
+        service_resource_id = input["service_resource_id"]
+
         project_id = config.CONFIG.context.project_id
-        return self.walrus_client.get_service_resource_keys(project_id, text)
+        environment_id = config.CONFIG.context.environment_id
+        return self.walrus_client.get_service_resource_keys(
+            project_id, environment_id, service_id, service_resource_id
+        )
 
 
 class GetServiceResourceLogsTool(BaseTool):
@@ -182,7 +199,7 @@ class GetServiceResourceLogsTool(BaseTool):
     description = (
         "Get logs of a service resource. "
         "Before using this tool, you should get keys of the resource first."
-        'Input should be a json with 2 keys: "service_resource_id", "key".'
+        'Input should be a json with 3 keys: "service_id", "service_resource_id", "key".'
         '"key" is identity of a service resource\'s component. It is required when you need logs or terminal access of a resource. '
         "Output is log text."
     )
@@ -193,12 +210,14 @@ class GetServiceResourceLogsTool(BaseTool):
             input = json.loads(text)
         except json.JSONDecodeError as e:
             raise e
+        service_id = input["service_id"]
         service_resource_id = input["service_resource_id"]
         key = input["key"]
 
         project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
         return self.walrus_client.get_service_resource_logs(
-            project_id, service_resource_id, key
+            project_id, environment_id, service_id, service_resource_id, key
         )
 
 
@@ -208,9 +227,9 @@ class ConstructServiceToCreateTool(BaseTool):
     name = "construct_service_to_create"
     description = (
         "Construct a service for creation in Walrus system."
-        'Input to the tool should be a json with 3 keys: "user_query" and "related_template_id".'
+        'Input to the tool should be a json with 3 keys: "user_query" and "related_template_name".'
         'The value of "user_query" should be the description of a deployment task.'
-        'The value of "related_template_id" should be id of a template related to the deployment task.'
+        'The value of "related_template_name" should be name of a template related to the deployment task.'
         "The output is a service object in json. It will be used in the creation of a service."
     )
     llm: BaseLanguageModel
@@ -223,14 +242,16 @@ class ConstructServiceToCreateTool(BaseTool):
             raise e
 
         query = data.get("user_query")
-        template_id = data.get("related_template_id")
+        template_name = data.get("related_template_name")
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         existing_services = self.walrus_client.list_services(
             project_id, environment_id
         )
-        related_template = self.walrus_client.get_template_version(template_id)
+        related_template = self.walrus_client.get_template_version(
+            template_name
+        )
 
         prompt = PromptTemplate(
             template=CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
@@ -251,10 +272,10 @@ class ConstructServiceToUpdateTool(BaseTool):
     name = "construct_service_to_update"
     description = (
         "Construct a service for update in Walrus system."
-        'Input to the tool should be a json with 3 keys: "user_query", "service_name" and "related_template_id".'
+        'Input to the tool should be a json with 3 keys: "user_query", "service_name" and "related_template_name".'
         'The value of "user_query" should be the description of a deployment task.'
         'The value of "service_name" should be name of the service about to update.'
-        'The value of "related_template_id" should be id of a template related to the deployment task.'
+        'The value of "related_template_name" should be name of a template related to the deployment task.'
         "The output is a service object in json. It will be used in the update of a service."
     )
     llm: BaseLanguageModel
@@ -268,11 +289,13 @@ class ConstructServiceToUpdateTool(BaseTool):
 
         query = data.get("user_query")
         service_name = data.get("service_name")
-        template_id = data.get("related_template_id")
+        template_name = data.get("related_template_name")
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        related_template = self.walrus_client.get_template_version(template_id)
+        related_template = self.walrus_client.get_template_version(
+            template_name
+        )
         current_service = self.walrus_client.get_service_by_name(
             project_id=project_id,
             environment_id=environment_id,

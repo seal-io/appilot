@@ -17,7 +17,7 @@ The output will be passed to an API controller that can format it into web reque
 
 Example:
 
-CONSTRUCTED SERVICE: {{"name":"example","template":{{"id":"webservice","version":"0.0.4"}},"environment":{{"id":"1234567"}},"attributes":{{"image":"nginx","ports":[80],"request_cpu":"0.1","request_memory":"128Mi"}}}}
+CONSTRUCTED SERVICE: {{"name":"example","template":{{"name":"webservice","version":"0.0.4"}},"environment":{{"id":"1234567"}},"attributes":{{"image":"nginx","ports":[80],"request_cpu":"0.1","request_memory":"128Mi"}}}}
 
 ----
 
@@ -51,7 +51,7 @@ The output will be used in the update API call of the service.
 
 Example:
 
-CONSTRUCTED SERVICE: {{"name":"example","template":{{"id":"webservice","version":"0.0.4"}},"environment":{{"id":"1234567"}},"attributes":{{"image":"nginx","ports":[80],"request_cpu":"0.1","request_memory":"128Mi"}}}}
+CONSTRUCTED SERVICE: {{"name":"example","template":{{"name":"webservice","version":"0.0.4"}},"environment":{{"id":"1234567"}},"attributes":{{"image":"nginx","ports":[80],"request_cpu":"0.1","request_memory":"128Mi"}}}}
 
 ----
 
