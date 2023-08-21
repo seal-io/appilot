@@ -1,1 +1,1 @@
-"""Seal agent."""
+"""Appilot agent."""

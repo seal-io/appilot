@@ -1,1 +1,1 @@
-"""Tool for managing Seal project and environment context."""
+"""Tool for managing Walrus project and environment context."""

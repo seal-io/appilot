@@ -1,7 +1,7 @@
 import json
 from typing import Any
 from config import config
-from seal.client import SealClient
+from walrus.client import WalrusClient
 from langchain.agents.tools import BaseTool
 from langchain import LLMChain
 from langchain.prompts import PromptTemplate
@@ -18,12 +18,12 @@ class ListServicesTool(BaseTool):
 
     name = "list_services"
     description = "List services."
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        services = self.seal_client.list_services(project_id, environment_id)
+        services = self.walrus_client.list_services(project_id, environment_id)
         return json.dumps(services)
 
 
@@ -32,12 +32,12 @@ class GetServicesTool(BaseTool):
 
     name = "get_service"
     description = "Get a service object. Input should be a service name."
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        service = self.seal_client.get_service_by_name(
+        service = self.walrus_client.get_service_by_name(
             project_id, environment_id, query
         )
         return json.dumps(service)
@@ -52,7 +52,7 @@ class CreateServiceTool(RequireApprovalTool):
         "Input should be a service object in json format."
         'Output a json string with 2 keys, "id" and "name" of the service.'
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
@@ -63,7 +63,7 @@ class CreateServiceTool(RequireApprovalTool):
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.seal_client.create_service(
+        return self.walrus_client.create_service(
             project_id, environment_id, text
         )
 
@@ -77,12 +77,12 @@ class UpdateServiceTool(RequireApprovalTool):
         "Input should be a service object in json format."
         'Output a json string with 2 keys, "id" and "name" of the service.'
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.seal_client.update_service(
+        return self.walrus_client.update_service(
             project_id, environment_id, text
         )
 
@@ -94,11 +94,11 @@ class DeleteServicesTool(RequireApprovalTool):
     description = (
         "Delete one or multiple services. Input should be ids of services."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.delete_services(project_id, query)
+        return self.walrus_client.delete_services(project_id, query)
 
 
 class GetServiceAccessEndpointsTool(BaseTool):
@@ -110,11 +110,13 @@ class GetServiceAccessEndpointsTool(BaseTool):
         "Input should be id of a service."
         "Output service access endpoints."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.get_service_access_endpoints(project_id, text)
+        return self.walrus_client.get_service_access_endpoints(
+            project_id, text
+        )
 
 
 class ListServiceResourcesTool(BaseTool):
@@ -127,11 +129,11 @@ class ListServiceResourcesTool(BaseTool):
         "Input should be id of a service. "
         "Output resource objects in json format."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.list_service_resources(project_id, text)
+        return self.walrus_client.list_service_resources(project_id, text)
 
 
 class GetServiceDependencyGraphTool(BaseTool):
@@ -144,7 +146,7 @@ class GetServiceDependencyGraphTool(BaseTool):
         "You can directly return the output to the user. No need to reformat. "
         "UI can use this data to render the graph."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         data = {
@@ -164,11 +166,11 @@ class GetServiceResourceKeysTool(BaseTool):
         "Input is id of a service resource."
         "Output is keys in json format."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.get_service_resource_keys(project_id, text)
+        return self.walrus_client.get_service_resource_keys(project_id, text)
 
 
 class GetServiceResourceLogsTool(BaseTool):
@@ -182,7 +184,7 @@ class GetServiceResourceLogsTool(BaseTool):
         '"key" is identity of a service resource\'s component. It is required when you need logs or terminal access of a resource. '
         "Output is log text."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
@@ -193,24 +195,24 @@ class GetServiceResourceLogsTool(BaseTool):
         key = input["key"]
 
         project_id = config.CONFIG.context.project_id
-        return self.seal_client.get_service_resource_logs(
+        return self.walrus_client.get_service_resource_logs(
             project_id, service_resource_id, key
         )
 
 
 class ConstructServiceToCreateTool(BaseTool):
-    """Construct a service for deployment in Seal system."""
+    """Construct a service for deployment in Walrus system."""
 
     name = "construct_service_to_create"
     description = (
-        "Construct a service for creation in Seal system."
+        "Construct a service for creation in Walrus system."
         'Input to the tool should be a json with 3 keys: "user_query" and "related_template_id".'
         'The value of "user_query" should be the description of a deployment task.'
-        'The value of "related_template_id" should be id of a Seal template related to the deployment task.'
+        'The value of "related_template_id" should be id of a template related to the deployment task.'
         "The output is a service object in json. It will be used in the creation of a service."
     )
     llm: BaseLanguageModel
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
@@ -223,10 +225,10 @@ class ConstructServiceToCreateTool(BaseTool):
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        existing_services = self.seal_client.list_services(
+        existing_services = self.walrus_client.list_services(
             project_id, environment_id
         )
-        related_template = self.seal_client.get_template_version(template_id)
+        related_template = self.walrus_client.get_template_version(template_id)
 
         prompt = PromptTemplate(
             template=CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
@@ -242,19 +244,19 @@ class ConstructServiceToCreateTool(BaseTool):
 
 
 class ConstructServiceToUpdateTool(BaseTool):
-    """Construct a service for upgrade in Seal system."""
+    """Construct a service for upgrade in Walrus system."""
 
     name = "construct_service_to_update"
     description = (
-        "Construct a service for update in Seal system."
+        "Construct a service for update in Walrus system."
         'Input to the tool should be a json with 3 keys: "user_query", "service_name" and "related_template_id".'
         'The value of "user_query" should be the description of a deployment task.'
         'The value of "service_name" should be name of the service about to update.'
-        'The value of "related_template_id" should be id of a Seal template related to the deployment task.'
+        'The value of "related_template_id" should be id of a template related to the deployment task.'
         "The output is a service object in json. It will be used in the update of a service."
     )
     llm: BaseLanguageModel
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
@@ -268,8 +270,8 @@ class ConstructServiceToUpdateTool(BaseTool):
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        related_template = self.seal_client.get_template_version(template_id)
-        current_service = self.seal_client.get_service_by_name(
+        related_template = self.walrus_client.get_template_version(template_id)
+        current_service = self.walrus_client.get_service_by_name(
             project_id=project_id,
             environment_id=environment_id,
             service_name=service_name,

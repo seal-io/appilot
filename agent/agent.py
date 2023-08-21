@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 
 from config import config
-from seal.client import SealClient
+from walrus.client import WalrusClient
 from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
@@ -39,8 +39,8 @@ from langchain.memory import ReadOnlySharedMemory
 from langchain.schema.language_model import BaseLanguageModel
 
 
-def create_seal_agent(
-    seal_client: SealClient,
+def create_agent(
+    walrus_client: WalrusClient,
     llm: BaseLanguageModel,
     shared_memory: Optional[ReadOnlySharedMemory] = None,
     callback_manager: Optional[BaseCallbackManager] = None,
@@ -55,25 +55,25 @@ def create_seal_agent(
         ShowReasoningTool(),
         HideReasoningTool(),
         CurrentContextTool(),
-        ChangeContextTool(seal_client=seal_client),
-        ListProjectsTool(seal_client=seal_client),
-        ListEnvironmentsTool(seal_client=seal_client),
-        DeleteEnvironmentsTool(seal_client=seal_client),
-        GetEnvironmentDependencyGraphTool(seal_client=seal_client),
-        MatchTemplateTool(llm=llm, seal_client=seal_client),
-        GetTemplateSchemaTool(seal_client=seal_client),
-        ConstructServiceToCreateTool(llm=llm, seal_client=seal_client),
-        ConstructServiceToUpdateTool(llm=llm, seal_client=seal_client),
-        GetServicesTool(seal_client=seal_client),
-        ListServicesTool(seal_client=seal_client),
-        CreateServiceTool(seal_client=seal_client),
-        UpdateServiceTool(seal_client=seal_client),
-        DeleteServicesTool(seal_client=seal_client),
-        ListServiceResourcesTool(seal_client=seal_client),
-        GetServiceResourceKeysTool(seal_client=seal_client),
-        GetServiceResourceLogsTool(seal_client=seal_client),
-        GetServiceAccessEndpointsTool(seal_client=seal_client),
-        GetServiceDependencyGraphTool(seal_client=seal_client),
+        ChangeContextTool(walrus_client=walrus_client),
+        ListProjectsTool(walrus_client=walrus_client),
+        ListEnvironmentsTool(walrus_client=walrus_client),
+        DeleteEnvironmentsTool(walrus_client=walrus_client),
+        GetEnvironmentDependencyGraphTool(walrus_client=walrus_client),
+        MatchTemplateTool(llm=llm, walrus_client=walrus_client),
+        GetTemplateSchemaTool(walrus_client=walrus_client),
+        ConstructServiceToCreateTool(llm=llm, walrus_client=walrus_client),
+        ConstructServiceToUpdateTool(llm=llm, walrus_client=walrus_client),
+        GetServicesTool(walrus_client=walrus_client),
+        ListServicesTool(walrus_client=walrus_client),
+        CreateServiceTool(walrus_client=walrus_client),
+        UpdateServiceTool(walrus_client=walrus_client),
+        DeleteServicesTool(walrus_client=walrus_client),
+        ListServiceResourcesTool(walrus_client=walrus_client),
+        GetServiceResourceKeysTool(walrus_client=walrus_client),
+        GetServiceResourceLogsTool(walrus_client=walrus_client),
+        GetServiceAccessEndpointsTool(walrus_client=walrus_client),
+        GetServiceDependencyGraphTool(walrus_client=walrus_client),
     ]
 
     format_instructions = FORMAT_INSTRUCTIONS_TEMPLATE.format(

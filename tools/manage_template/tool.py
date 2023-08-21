@@ -5,7 +5,7 @@ from langchain.agents.tools import BaseTool
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from tools.manage_template.prompt import FIND_TEMPLATE_PROMPT
-from seal.client import SealClient
+from walrus.client import WalrusClient
 
 
 class MatchTemplateTool(BaseTool):
@@ -20,11 +20,11 @@ class MatchTemplateTool(BaseTool):
         "Input should be description of the task. For upgrade task, include previous template info."
         "Output matching template id, or None when no matching template found."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
     llm: BaseLanguageModel
 
     def _run(self, query: str) -> str:
-        templates = self.seal_client.list_templates()
+        templates = self.walrus_client.list_templates()
         prompt = PromptTemplate(
             template=FIND_TEMPLATE_PROMPT,
             input_variables=["query"],
@@ -45,7 +45,7 @@ class GetTemplateSchemaTool(BaseTool):
         "Input should be a template id."
         "Output template schema."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        return self.seal_client.get_template_version(query)
+        return self.walrus_client.get_template_version(query)

@@ -1,1 +1,1 @@
-"""Global configuration of the agent."""
+"""Global configuration of Appilot."""

@@ -3,9 +3,9 @@ from typing import Any
 from callbacks import handlers
 from config import config
 from i18n import text
-from seal.client import SealClient
+from walrus.client import WalrusClient
 from utils import utils
-from agent.agent import create_seal_agent
+from agent.agent import create_agent
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
@@ -24,21 +24,21 @@ def setup_agent() -> Any:
 
     text.init_system_messages(llm)
 
-    seal_client = SealClient(
-        config.CONFIG.seal_url,
-        config.CONFIG.seal_api_key,
+    walrus_client = WalrusClient(
+        config.CONFIG.walrus_url,
+        config.CONFIG.walrus_api_key,
         verify=(not config.CONFIG.skip_tls_verify),
     )
 
     memory = ConversationBufferMemory(memory_key="chat_history")
 
-    return create_seal_agent(
-        seal_client, llm, shared_memory=memory, verbose=config.CONFIG.verbose
+    return create_agent(
+        walrus_client, llm, shared_memory=memory, verbose=config.CONFIG.verbose
     )
 
 
 def run():
-    seal_agent = setup_agent()
+    appilot_agent = setup_agent()
 
     print(text.get("welcome"))
     user_query = None
@@ -48,5 +48,5 @@ def run():
             continue
         elif user_query == "exit":
             break
-        result = seal_agent.run(user_query)
+        result = appilot_agent.run(user_query)
         utils.print_ai_response(result)

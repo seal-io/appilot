@@ -3,8 +3,8 @@ from typing import List
 import requests
 
 
-class SealClient:
-    """HTTP client for Seal API."""
+class WalrusClient:
+    """HTTP client for Walrus API."""
 
     def __init__(self, api_url: str, api_key: str, **kwargs):
         self.api_url = api_url

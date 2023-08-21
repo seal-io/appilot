@@ -1,7 +1,7 @@
 import json
 from langchain.agents.tools import BaseTool
 from config import config
-from seal.client import SealClient
+from walrus.client import WalrusClient
 
 
 class CurrentContextTool(BaseTool):
@@ -23,7 +23,7 @@ class ChangeContextTool(BaseTool):
         "Input should be a json string with 2 keys: "
         "project_name, environment_name."
     )
-    seal_client: SealClient
+    walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
@@ -31,7 +31,7 @@ class ChangeContextTool(BaseTool):
         except json.JSONDecodeError as e:
             raise e
 
-        projects = self.seal_client.list_projects()
+        projects = self.walrus_client.list_projects()
         for project in projects:
             if project["name"] == context["project_name"]:
                 context["project_id"] = project["id"]
@@ -39,7 +39,7 @@ class ChangeContextTool(BaseTool):
         if "project_id" not in context:
             raise Exception("Project not found")
 
-        environments = self.seal_client.list_environments(
+        environments = self.walrus_client.list_environments(
             context["project_id"]
         )
         for environment in environments:

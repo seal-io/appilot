@@ -1,7 +1,7 @@
 # Appilot
 
 Appilot`[ə'paɪlət]` stands for application-pilot.
-It is an experimental project that introduces GPTOps: operate your applications using GPT-like LLM.
+It is an experimental project that helps you operate applications using GPT-like LLM.
 
 ## Demo
 
@@ -30,7 +30,7 @@ It is an experimental project that introduces GPTOps: operate your applications 
 **prerequistes:**
 
 - Get OpenAI API key with access to the gpt-4 model.
-- Install [Seal](https://github.com/seal-io/seal) and get the url and API key. Seal is an open source software that can be run by a docker command. It serves as the engine for application management.
+- Install [Walrus](https://github.com/seal-io/walrus) and get the url and API key. Walrus is an open source software that can be run by a docker command. It serves as the engine for application management.
 
 ### Run with Docker
 

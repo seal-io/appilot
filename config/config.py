@@ -1,7 +1,7 @@
 from utils import utils
 import urllib3
 
-from seal.client import SealClient
+from walrus.client import WalrusClient
 
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -16,8 +16,8 @@ class Context(BaseModel):
 
 class Config(BaseModel):
     openai_api_key: str
-    seal_api_key: str
-    seal_url: str
+    walrus_api_key: str
+    walrus_url: str
     natural_language: str
     show_reasoning: bool
     verbose: bool
@@ -31,8 +31,8 @@ CONFIG: Config
 def init():
     load_dotenv()
     openai_api_key = utils.get_env("OPENAI_API_KEY")
-    seal_api_key = utils.get_env("SEAL_API_KEY")
-    seal_url = utils.get_env("SEAL_URL")
+    walrus_api_key = utils.get_env("WALRUS_API_KEY")
+    walrus_url = utils.get_env("WALRUS_URL")
     natural_language = utils.get_env("NATURAL_LANGUAGE", "English")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
@@ -41,19 +41,19 @@ def init():
     if skip_tls_verify:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    if not seal_url:
-        raise Exception("SEAL_URL is not set")
-    if not seal_api_key:
-        raise Exception("SEAL_API_KEY is not set")
+    if not walrus_url:
+        raise Exception("WALRUS_URL is not set")
+    if not walrus_api_key:
+        raise Exception("WALRUS_API_KEY is not set")
     if not openai_api_key:
         raise Exception("OPENAI_API_KEY is not set")
 
     global CONFIG
-    context = _default_context(seal_url, seal_api_key)
+    context = _default_context(walrus_url, walrus_api_key)
     CONFIG = Config(
         openai_api_key=openai_api_key,
-        seal_api_key=seal_api_key,
-        seal_url=seal_url,
+        walrus_api_key=walrus_api_key,
+        walrus_url=walrus_url,
         natural_language=natural_language,
         show_reasoning=show_reasoning,
         verbose=verbose,
@@ -77,14 +77,14 @@ def update_context(context: Context):
     CONFIG.context = context
 
 
-def _default_context(seal_url: str, seal_api_key: str) -> Context:
-    seal_client = SealClient(
-        seal_url,
-        seal_api_key,
+def _default_context(walrus_url: str, walrus_api_key: str) -> Context:
+    walrus_client = WalrusClient(
+        walrus_url,
+        walrus_api_key,
         verify=False,
     )
     context = Context()
-    projects = seal_client.list_projects()
+    projects = walrus_client.list_projects()
     if len(projects) > 0:
         project = projects[0]
         context = Context(
@@ -95,7 +95,7 @@ def _default_context(seal_url: str, seal_api_key: str) -> Context:
         # no project found
         return context
 
-    environments = seal_client.list_environments(context.project_id)
+    environments = walrus_client.list_environments(context.project_id)
     if len(environments) > 0:
         environment = environments[0]
         context.environment_id = environment["id"]
