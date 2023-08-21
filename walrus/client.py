@@ -30,11 +30,10 @@ class WalrusClient:
         """List environments."""
         headers = {"Authorization": f"Bearer {self.api_key}"}
         params = {
-            "projectID": project_id,
             "perPage": -1,
         }
         response = requests.get(
-            url=self.api_url + "/v1/environments",
+            url=self.api_url + f"/v1/projects/{project_id}/environments",
             params=params,
             headers=headers,
             **self.request_args,
@@ -46,20 +45,19 @@ class WalrusClient:
 
     def delete_environments(self, project_id: str, ids: List[str]):
         """Delete one or multiple environments."""
-        params = {
-            "projectID": project_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
-        try:
-            id_list = json.loads(ids)
-        except json.JSONDecodeError as e:
-            return f"Failed to decode ids: {e}"
+        items = []
+        for id in ids:
+            items.append({"id": id})
+        # try:
+        #     id_list = json.loads(ids)
+        # except json.JSONDecodeError as e:
+        #     return f"Failed to decode ids: {e}"
 
-        body = {"ids": id_list}
+        body = {"items": items}
         response = requests.delete(
-            url=self.api_url + f"/v1/environments",
-            params=params,
+            url=self.api_url + f"/v1/projects/{project_id}/environments",
             headers=headers,
             json=body,
             **self.request_args,
@@ -72,14 +70,9 @@ class WalrusClient:
     def get_environment_graph(self, project_id: str, environment_id: str):
         """Get environment dependency graph."""
         headers = {"Authorization": f"Bearer {self.api_key}"}
-        params = {
-            "projectID": project_id,
-            "environmentID": environment_id,
-            "perPage": -1,
-        }
         response = requests.get(
-            url=self.api_url + "/v1/services/_/graph",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/graph",
             headers=headers,
             **self.request_args,
         )
@@ -93,14 +86,13 @@ class WalrusClient:
     def list_services(self, project_id: str, environment_id: str):
         """List services in a project and environment."""
         params = {
-            "projectID": project_id,
-            "environmentID": environment_id,
             "perPage": -1,
         }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + "/v1/services",
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services",
             params=params,
             headers=headers,
             **self.request_args,
@@ -114,24 +106,26 @@ class WalrusClient:
         self, project_id: str, environment_id: str, service_name: str
     ):
         """Get a service by name."""
-        services = self.list_services(project_id, environment_id)
-        for service in services:
-            if service["name"] == service_name:
-                return service
+        headers = {"Authorization": f"Bearer {self.api_key}"}
 
-        return f"service {service_name} not found"
+        response = requests.get(
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service_name}",
+            headers=headers,
+            **self.request_args,
+        )
+        if response.status_code != 200:
+            return f"Failed to get service: {response.text}"
+
+        return response.text
 
     def create_service(self, project_id: str, environment_id: str, data):
         """Create a service in a project and environment."""
-        params = {
-            "projectID": project_id,
-            "environmentID": environment_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.post(
-            url=self.api_url + "/v1/services",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services",
             headers=headers,
             data=data,
             **self.request_args,
@@ -143,21 +137,16 @@ class WalrusClient:
 
     def update_service(self, project_id: str, environment_id: str, data):
         """Update a service in a project and environment."""
-
         try:
             service = json.loads(data)
         except json.JSONDecodeError as e:
             raise e
 
-        params = {
-            "projectID": project_id,
-            "environmentID": environment_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.put(
-            url=self.api_url + f"/v1/services/{service['id']}/upgrade",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service['id']}/upgrade",
             headers=headers,
             data=data,
             **self.request_args,
@@ -167,22 +156,20 @@ class WalrusClient:
 
         return response.text
 
-    def delete_services(self, project_id: str, ids: List[str]):
+    def delete_services(
+        self, project_id: str, environment_id: str, ids: List[str]
+    ):
         """Delete one or multiple services."""
-        params = {
-            "projectID": project_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
-        try:
-            id_list = json.loads(ids)
-        except json.JSONDecodeError as e:
-            return f"Failed to decode ids: {e}"
+        items = []
+        for id in ids:
+            items.append({"id": id})
 
-        body = {"ids": id_list}
+        body = {"items": items}
         response = requests.delete(
-            url=self.api_url + f"/v1/services",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services",
             headers=headers,
             json=body,
             **self.request_args,
@@ -192,17 +179,15 @@ class WalrusClient:
 
         return response.text
 
-    def get_service_access_endpoints(self, project_id: str, service_id: str):
+    def get_service_access_endpoints(
+        self, project_id: str, environment_id: str, service_id: str
+    ):
         """Get access endpoints of a service."""
-
-        params = {
-            "projectID": project_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + f"/v1/services/{service_id}/access-endpoints",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service_id}/access-endpoints",
             headers=headers,
             **self.request_args,
         )
@@ -211,18 +196,15 @@ class WalrusClient:
 
         return response.text
 
-    def list_service_resources(self, project_id: str, service_id: str):
+    def list_service_resources(
+        self, project_id: str, environment_id: str, service_id: str
+    ):
         """List resources of a service."""
-
-        params = {
-            "projectID": project_id,
-            "serviceID": service_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + f"/v1/service-resources",
-            params=params,
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service_id}/resources",
             headers=headers,
             **self.request_args,
         )
@@ -232,19 +214,18 @@ class WalrusClient:
         return response.json()["items"]
 
     def get_service_resource_keys(
-        self, project_id: str, service_resource_id: str
+        self,
+        project_id: str,
+        environment_id: str,
+        service_id: str,
+        service_resource_id: str,
     ):
         """Get keys of a service resource."""
-
-        params = {
-            "projectID": project_id,
-        }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
             url=self.api_url
-            + f"/v1/service-resources/{service_resource_id}/keys",
-            params=params,
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service_id}/resources/{service_resource_id}/keys",
             headers=headers,
             **self.request_args,
         )
@@ -254,19 +235,22 @@ class WalrusClient:
         return response.text
 
     def get_service_resource_logs(
-        self, project_id: str, service_resource_id: str, key: str
+        self,
+        project_id: str,
+        environment_id: str,
+        service_id: str,
+        service_resource_id: str,
+        key: str,
     ):
         """Get logs of a service resource."""
-
         params = {
-            "projectID": project_id,
             "key": key,
         }
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
             url=self.api_url
-            + f"/v1/service-resources/{service_resource_id}/logs",
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services/{service_id}/resources/{service_resource_id}/log",
             params=params,
             headers=headers,
             **self.request_args,
@@ -302,7 +286,7 @@ class WalrusClient:
         headers = {"Authorization": f"Bearer {self.api_key}"}
 
         response = requests.get(
-            url=self.api_url + "/v1/template-versions",
+            url=self.api_url + f"/v1/templates/{id}/versions",
             params={"templateID": id, "perPage": -1},
             headers=headers,
             **self.request_args,
