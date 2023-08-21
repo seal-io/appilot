@@ -24,7 +24,9 @@ class ListServicesTool(BaseTool):
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         services = self.walrus_client.list_services(project_id, environment_id)
-        return json.dumps(services)
+        if services is not None and len(services) > 0:
+            return json.dumps(services)
+        return "No services found."
 
 
 class GetServicesTool(BaseTool):

@@ -17,7 +17,9 @@ class ListEnvironmentsTool(BaseTool):
 
     def _run(self, text: str) -> str:
         environments = self.walrus_client.list_environments(text)
-        return json.dumps(environments)
+        if environments is not None and len(environments) > 0:
+            return json.dumps(environments)
+        return "No environments found."
 
 
 class DeleteEnvironmentsTool(RequireApprovalTool):
