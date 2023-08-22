@@ -16,6 +16,7 @@ class Context(BaseModel):
 
 class Config(BaseModel):
     openai_api_key: str
+    openai_api_base: str
     walrus_api_key: str
     walrus_url: str
     natural_language: str
@@ -30,6 +31,7 @@ CONFIG: Config
 
 def init():
     load_dotenv()
+    openai_api_base = utils.get_env("OPENAI_API_BASE")
     openai_api_key = utils.get_env("OPENAI_API_KEY")
     walrus_api_key = utils.get_env("WALRUS_API_KEY")
     walrus_url = utils.get_env("WALRUS_URL")
@@ -51,6 +53,7 @@ def init():
     global CONFIG
     context = _default_context(walrus_url, walrus_api_key)
     CONFIG = Config(
+        openai_api_base=openai_api_base,
         openai_api_key=openai_api_key,
         walrus_api_key=walrus_api_key,
         walrus_url=walrus_url,
