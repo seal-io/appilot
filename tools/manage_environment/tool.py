@@ -11,12 +11,15 @@ class ListEnvironmentsTool(BaseTool):
 
     name = "list_environments"
     description = (
-        "List environments of a project. Input should be a project id."
+        "List environments of a project."
+        "Input should be a project id or an empty string indicating current project in the context."
     )
     walrus_client: WalrusClient
 
-    def _run(self, text: str) -> str:
-        environments = self.walrus_client.list_environments(text)
+    def _run(self, project_id: str) -> str:
+        if project_id == "":
+            project_id = config.CONFIG.context.project_id
+        environments = self.walrus_client.list_environments(project_id)
         if environments is not None and len(environments) > 0:
             return json.dumps(environments)
         return "No environments found."

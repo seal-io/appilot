@@ -17,13 +17,31 @@ class ListServicesTool(BaseTool):
     """Tool to list services."""
 
     name = "list_services"
-    description = "List services."
+    description = "List services in current environment."
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         services = self.walrus_client.list_services(project_id, environment_id)
+        if services is not None and len(services) > 0:
+            return json.dumps(services)
+        return "No services found."
+
+
+class ListServicesInAllEnvironmentsTool(BaseTool):
+    """Tool to list services in all environments."""
+
+    name = "list_services_in_all_environments"
+    description = "List services in all environments of current project."
+    walrus_client: WalrusClient
+
+    def _run(self, query: str) -> str:
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+        services = self.walrus_client.list_services_in_all_environments(
+            project_id
+        )
         if services is not None and len(services) > 0:
             return json.dumps(services)
         return "No services found."

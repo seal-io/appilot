@@ -102,6 +102,28 @@ class WalrusClient:
 
         return response.json()["items"]
 
+    def list_services_in_all_environments(self, project_id: str):
+        """List services in all environments of a project."""
+        params = {
+            "perPage": -1,
+        }
+
+        services = []
+        envs = self.list_environments(project_id)
+        for env in envs:
+            response = requests.get(
+                url=self.api_url
+                + f"/v1/projects/{project_id}/environments/{env['id']}/services",
+                params=params,
+                headers=self.headers(),
+                **self.request_args,
+            )
+            if response.status_code != 200:
+                return f"Failed to list services: {response.text}"
+            services.extend(response.json()["items"])
+
+        return services
+
     def get_service_by_name(
         self, project_id: str, environment_id: str, service_name: str
     ):
