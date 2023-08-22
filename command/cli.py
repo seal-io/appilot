@@ -1,4 +1,5 @@
 from typing import Any
+import readline
 
 from callbacks import handlers
 from config import config
