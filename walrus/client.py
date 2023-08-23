@@ -296,10 +296,12 @@ class WalrusClient:
         service_id: str,
         service_resource_id: str,
         key: str,
+        line_number: int,
     ):
         """Get logs of a service resource."""
         params = {
             "key": key,
+            "tailLines": line_number,
         }
 
         response = requests.get(

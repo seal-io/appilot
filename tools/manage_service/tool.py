@@ -257,8 +257,9 @@ class GetServiceResourceLogsTool(BaseTool):
     description = (
         "Get logs of a service resource. "
         "Before using this tool, you should get keys of the resource first."
-        'Input should be a json with 3 keys: "service_id", "service_resource_id", "key".'
+        'Input should be a json with 4 keys: "service_id", "service_resource_id", "key", "line_number".'
         '"key" is identity of a service resource\'s component. It is required when you need logs or terminal access of a resource. '
+        '"line_number" is the number of lines of logs to get. defaults to 100 if user does not specify. '
         "Output is log text."
     )
     walrus_client: WalrusClient
@@ -268,9 +269,10 @@ class GetServiceResourceLogsTool(BaseTool):
             input = json.loads(text)
         except Exception as e:
             raise e
-        service_id = input["service_id"]
-        service_resource_id = input["service_resource_id"]
-        key = input["key"]
+        service_id = input.get("service_id")
+        service_resource_id = input.get("service_resource_id")
+        key = input.get("key")
+        line_number = input.get("line_number", 100)
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
@@ -281,6 +283,7 @@ class GetServiceResourceLogsTool(BaseTool):
                 service_id,
                 service_resource_id,
                 key,
+                line_number,
             )
         except Exception as e:
             return e
