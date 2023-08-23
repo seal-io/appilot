@@ -17,6 +17,7 @@ system_messages = {
     "ai_reasoning": "Appilot reasoning:",
     "response_prefix": "Appilot:",
     "error_occur_message": "An internal error occurred. Enter 'appilot_log' if you want to see the details.",
+    "rejected_message": "The action is rejected.",
     "no_error_message": "No error occurred.",
     "ask_approval": """
 The following action requires approval:
@@ -27,9 +28,7 @@ Input:
 Action: 
 {tool_name}
  
-Do you approve the above action?
-Anything except 'Y'/'Yes' (case-insensitive) will be treated as a no.
-""",
+Do you approve the above action? """,
 }
 
 

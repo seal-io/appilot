@@ -347,7 +347,7 @@ class WalrusClient:
         )
         if response.status_code >= 400:
             raise Exception(
-                f"Failed to list template versions: {response.text}"
+                f"Failed to list versions of template {template}: {response.text}"
             )
 
         template_versions = response.json()["items"]

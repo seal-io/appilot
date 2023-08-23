@@ -12,7 +12,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 import colorama
 
-
 last_error = None
 
 
@@ -58,6 +57,9 @@ def run():
 
         try:
             result = appilot_agent.run(user_query)
+        except handlers.HumanRejectedException as he:
+            utils.print_rejected_message()
+            continue
         except Exception as e:
             handle_exception(e)
             continue

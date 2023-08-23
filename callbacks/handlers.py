@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, List, Union
 from uuid import UUID
+import click
 
 from i18n import text
 from utils import utils
@@ -36,10 +37,12 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
 
     def _approve(self, _input: str, serialized: Dict[str, Any]) -> bool:
         message = text.get("ask_approval")
-        resp = input(
-            message.format(input=_input, tool_name=serialized["name"])
+
+        return click.confirm(
+            message.format(input=_input, tool_name=serialized["name"]),
+            default=False,
+            prompt_suffix="",
         )
-        return resp.lower() in ("yes", "y")
 
 
 class PrintReasoningCallbackHandler(BaseCallbackHandler):

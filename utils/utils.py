@@ -31,3 +31,8 @@ def print_ai_reasoning(message):
 def print_ai_response(message):
     print(text.get("response_prefix"), end="")
     console.print(Markdown(message))
+
+
+def print_rejected_message():
+    print(text.get("response_prefix"), end="")
+    print(text.get("rejected_message"))
