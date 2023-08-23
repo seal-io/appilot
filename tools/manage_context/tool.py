@@ -22,31 +22,34 @@ class ChangeContextTool(BaseTool):
         "Change project and environment context."
         "Input should be a json string with 2 keys: "
         "project_name, environment_name."
+        "If users did not specify any of the two keys, leave it empty."
     )
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
             context = json.loads(text)
-        except json.JSONDecodeError as e:
-            raise e
+        except Exception as e:
+            return e
 
-        projects = self.walrus_client.list_projects()
-        for project in projects:
-            if project["name"] == context["project_name"]:
-                context["project_id"] = project["id"]
-                break
-        if "project_id" not in context:
-            raise Exception("Project not found")
+        project_id = config.CONFIG.context.project_id
+        if "project_name" in context and context["project_name"] != "":
+            try:
+                project = self.walrus_client.get_project(
+                    context["project_name"]
+                )
+            except Exception as e:
+                return e
+            project_id = project["id"]
+            context["project_id"] = project_id
 
-        environments = self.walrus_client.list_environments(
-            context["project_id"]
-        )
-        for environment in environments:
-            if environment["name"] == context["environment_name"]:
-                context["environment_id"] = environment["id"]
-                break
-        if "environment_id" not in context:
-            raise Exception("Environment not found")
+        if "environment_name" in context and context["environment_name"] != "":
+            try:
+                environment = self.walrus_client.get_environment(
+                    project_id, context["environment_name"]
+                )
+            except Exception as e:
+                return e
+            context["environment_id"] = environment["id"]
 
         config.update_context(context)

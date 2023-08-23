@@ -13,6 +13,9 @@ from langchain.memory import ConversationBufferMemory
 import colorama
 
 
+last_error = None
+
+
 def setup_agent() -> Any:
     config.init()
     colorama.init()
@@ -49,5 +52,29 @@ def run():
             continue
         elif user_query == "exit":
             break
-        result = appilot_agent.run(user_query)
+        elif user_query == "appilot_log":
+            print_last_error()
+            continue
+
+        try:
+            result = appilot_agent.run(user_query)
+        except Exception as e:
+            handle_exception(e)
+            continue
+
         utils.print_ai_response(result)
+
+
+def handle_exception(e):
+    global last_error
+    print(text.get("response_prefix"), end="")
+    print(text.get("error_occur_message"))
+    last_error = e
+
+
+def print_last_error():
+    if last_error is None:
+        print(text.get("response_prefix"), end="")
+        print(text.get("no_error_message"))
+    else:
+        print(last_error)

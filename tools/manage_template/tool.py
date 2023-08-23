@@ -24,7 +24,11 @@ class MatchTemplateTool(BaseTool):
     llm: BaseLanguageModel
 
     def _run(self, query: str) -> str:
-        templates = self.walrus_client.list_templates()
+        try:
+            templates = self.walrus_client.list_templates()
+        except Exception as e:
+            return e
+
         prompt = PromptTemplate(
             template=FIND_TEMPLATE_PROMPT,
             input_variables=["query"],
@@ -48,4 +52,9 @@ class GetTemplateSchemaTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        return self.walrus_client.get_template_version(query)
+        try:
+            template_version = self.walrus_client.get_template_version(query)
+        except Exception as e:
+            return e
+
+        return template_version

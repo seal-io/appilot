@@ -12,5 +12,8 @@ class ListProjectsTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        projects = self.walrus_client.list_projects()
+        try:
+            projects = self.walrus_client.list_projects()
+        except Exception as e:
+            return e
         return json.dumps(projects)

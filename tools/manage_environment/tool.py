@@ -19,7 +19,10 @@ class ListEnvironmentsTool(BaseTool):
     def _run(self, project_id: str) -> str:
         if project_id == "":
             project_id = config.CONFIG.context.project_id
-        environments = self.walrus_client.list_environments(project_id)
+        try:
+            environments = self.walrus_client.list_environments(project_id)
+        except Exception as e:
+            return e
         if environments is not None and len(environments) > 0:
             return json.dumps(environments)
         return "No environments found."
@@ -34,7 +37,12 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
-        return self.walrus_client.delete_environments(project_id, text)
+        try:
+            self.walrus_client.delete_environments(project_id, text)
+        except Exception as e:
+            return e
+
+        return "Successfully deleted."
 
 
 class GetEnvironmentDependencyGraphTool(BaseTool):

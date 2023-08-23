@@ -27,9 +27,23 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to list projects: {response.text}"
+            raise Exception(f"Failed to list projects: {response.text}")
 
         return response.json()["items"]
+
+    def get_project(self, project: str):
+        """Get a project by id or name."""
+        response = requests.get(
+            url=self.api_url + f"/v1/projects/{project}",
+            headers=self.headers(),
+            **self.request_args,
+        )
+        if response.status_code != 200:
+            raise Exception(
+                f"Failed to get project {project}: {response.text}"
+            )
+
+        return response.json()
 
     def list_environments(self, project_id: str):
         """List environments."""
@@ -43,19 +57,30 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to list environments: {response.text}"
+            raise Exception(f"Failed to list environments: {response.text}")
 
         return response.json()["items"]
+
+    def get_environment(self, project_id: str, environment: str):
+        """Get an environment by id or name."""
+        response = requests.get(
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment}",
+            headers=self.headers(),
+            **self.request_args,
+        )
+        if response.status_code != 200:
+            raise Exception(
+                f"Failed to get environment {environment}: {response.text}"
+            )
+
+        return response.json()
 
     def delete_environments(self, project_id: str, ids: List[str]):
         """Delete one or multiple environments."""
         items = []
         for id in ids:
             items.append({"id": id})
-        # try:
-        #     id_list = json.loads(ids)
-        # except json.JSONDecodeError as e:
-        #     return f"Failed to decode ids: {e}"
 
         body = {"items": items}
         response = requests.delete(
@@ -65,7 +90,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to delete environment: {response.text}"
+            raise Exception(f"Failed to delete environment: {response.text}")
 
         return response.text
 
@@ -78,7 +103,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return (
+            raise Exception(
                 f"Failed to get environment dependency graph: {response.text}"
             )
 
@@ -98,7 +123,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to list services: {response.text}"
+            raise Exception(f"Failed to list services: {response.text}")
 
         return response.json()["items"]
 
@@ -119,7 +144,7 @@ class WalrusClient:
                 **self.request_args,
             )
             if response.status_code != 200:
-                return f"Failed to list services: {response.text}"
+                raise Exception(f"Failed to list services: {response.text}")
             services.extend(response.json()["items"])
 
         return services
@@ -136,7 +161,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get service: {response.text}"
+            raise Exception(f"Failed to get service: {response.text}")
 
         return response.text
 
@@ -151,7 +176,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 201:
-            return f"Failed to create service: {response.text}"
+            raise Exception(f"Failed to create service: {response.text}")
 
         return response.text
 
@@ -170,7 +195,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to update service: {response.text}"
+            raise Exception(f"Failed to update service: {response.text}")
 
         return response.text
 
@@ -191,7 +216,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to delete service: {response.text}"
+            raise Exception(f"Failed to delete service: {response.text}")
 
         return response.text
 
@@ -206,7 +231,9 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get service access endpoints: {response.text}"
+            raise Exception(
+                f"Failed to get service access endpoints: {response.text}"
+            )
 
         return response.text
 
@@ -221,7 +248,9 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get service resources: {response.text}"
+            raise Exception(
+                f"Failed to get service resources: {response.text}"
+            )
 
         return response.json()["items"]
 
@@ -240,7 +269,9 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get service resource keys: {response.text}"
+            raise Exception(
+                f"Failed to get service resource keys: {response.text}"
+            )
 
         return response.text
 
@@ -265,7 +296,9 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to get service resource logs: {response.text}"
+            raise Exception(
+                f"Failed to get service resource logs: {response.text}"
+            )
 
         return response.text
 
@@ -278,7 +311,7 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to list templates: {response.text}"
+            raise Exception(f"Failed to list templates: {response.text}")
 
         templates = response.json()["items"]
         for template in templates:
@@ -297,11 +330,13 @@ class WalrusClient:
             **self.request_args,
         )
         if response.status_code != 200:
-            return f"Failed to list template versions: {response.text}"
+            raise Exception(
+                f"Failed to list template versions: {response.text}"
+            )
 
         template_versions = response.json()["items"]
         if len(template_versions) == 0:
-            raise Exception(f"Failed to get template version: {response.text}")
+            raise Exception("Template version not found")
 
         keys_to_remove = [
             "readme",

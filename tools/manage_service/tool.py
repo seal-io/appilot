@@ -23,9 +23,16 @@ class ListServicesTool(BaseTool):
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        services = self.walrus_client.list_services(project_id, environment_id)
+        try:
+            services = self.walrus_client.list_services(
+                project_id, environment_id
+            )
+        except Exception as e:
+            return e
+
         if services is not None and len(services) > 0:
             return json.dumps(services)
+
         return "No services found."
 
 
@@ -38,12 +45,16 @@ class ListServicesInAllEnvironmentsTool(BaseTool):
 
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
-        services = self.walrus_client.list_services_in_all_environments(
-            project_id
-        )
+        try:
+            services = self.walrus_client.list_services_in_all_environments(
+                project_id
+            )
+        except Exception as e:
+            return e
+
         if services is not None and len(services) > 0:
             return json.dumps(services)
+
         return "No services found."
 
 
@@ -57,9 +68,13 @@ class GetServicesTool(BaseTool):
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        service = self.walrus_client.get_service_by_name(
-            project_id, environment_id, query
-        )
+        try:
+            service = self.walrus_client.get_service_by_name(
+                project_id, environment_id, query
+            )
+        except Exception as e:
+            return e
+
         return json.dumps(service)
 
 
@@ -76,16 +91,18 @@ class CreateServiceTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         try:
-            # verify input
             json.loads(text)
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise e
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.create_service(
-            project_id, environment_id, text
-        )
+        try:
+            self.walrus_client.create_service(project_id, environment_id, text)
+        except Exception as e:
+            return e
+
+        return "Successfully created."
 
 
 class UpdateServiceTool(RequireApprovalTool):
@@ -102,9 +119,12 @@ class UpdateServiceTool(RequireApprovalTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.update_service(
-            project_id, environment_id, text
-        )
+        try:
+            self.walrus_client.update_service(project_id, environment_id, text)
+        except Exception as e:
+            return e
+
+        return "Successfully updated."
 
 
 class DeleteServicesTool(RequireApprovalTool):
@@ -119,9 +139,14 @@ class DeleteServicesTool(RequireApprovalTool):
     def _run(self, query: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.delete_services(
-            project_id, environment_id, query
-        )
+        try:
+            self.walrus_client.delete_services(
+                project_id, environment_id, query
+            )
+        except Exception as e:
+            return e
+
+        return "Successfully deleted."
 
 
 class GetServiceAccessEndpointsTool(BaseTool):
@@ -138,9 +163,14 @@ class GetServiceAccessEndpointsTool(BaseTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.get_service_access_endpoints(
-            project_id, environment_id, text
-        )
+        try:
+            endpoints = self.walrus_client.get_service_access_endpoints(
+                project_id, environment_id, text
+            )
+        except Exception as e:
+            return e
+
+        return endpoints
 
 
 class ListServiceResourcesTool(BaseTool):
@@ -158,9 +188,14 @@ class ListServiceResourcesTool(BaseTool):
     def _run(self, text: str) -> str:
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.list_service_resources(
-            project_id, environment_id, text
-        )
+        try:
+            resources = self.walrus_client.list_service_resources(
+                project_id, environment_id, text
+            )
+        except Exception as e:
+            return e
+
+        return resources
 
 
 class GetServiceDependencyGraphTool(BaseTool):
@@ -198,16 +233,21 @@ class GetServiceResourceKeysTool(BaseTool):
     def _run(self, text: str) -> str:
         try:
             input = json.loads(text)
-        except json.JSONDecodeError as e:
-            raise e
+        except Exception as e:
+            return e
         service_id = input["service_id"]
         service_resource_id = input["service_resource_id"]
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.get_service_resource_keys(
-            project_id, environment_id, service_id, service_resource_id
-        )
+        try:
+            keys = self.walrus_client.get_service_resource_keys(
+                project_id, environment_id, service_id, service_resource_id
+            )
+        except Exception as e:
+            return e
+
+        return keys
 
 
 class GetServiceResourceLogsTool(BaseTool):
@@ -226,7 +266,7 @@ class GetServiceResourceLogsTool(BaseTool):
     def _run(self, text: str) -> str:
         try:
             input = json.loads(text)
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise e
         service_id = input["service_id"]
         service_resource_id = input["service_resource_id"]
@@ -234,9 +274,18 @@ class GetServiceResourceLogsTool(BaseTool):
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
-        return self.walrus_client.get_service_resource_logs(
-            project_id, environment_id, service_id, service_resource_id, key
-        )
+        try:
+            log = self.walrus_client.get_service_resource_logs(
+                project_id,
+                environment_id,
+                service_id,
+                service_resource_id,
+                key,
+            )
+        except Exception as e:
+            return e
+
+        return log
 
 
 class ConstructServiceToCreateTool(BaseTool):
@@ -256,7 +305,7 @@ class ConstructServiceToCreateTool(BaseTool):
     def _run(self, text: str) -> str:
         try:
             data = json.loads(text)
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise e
 
         query = data.get("user_query")
@@ -302,7 +351,7 @@ class ConstructServiceToUpdateTool(BaseTool):
     def _run(self, text: str) -> str:
         try:
             data = json.loads(text)
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise e
 
         query = data.get("user_query")

@@ -16,6 +16,8 @@ system_messages = {
     "welcome": "Appilot: What can I help?",
     "ai_reasoning": "Appilot reasoning:",
     "response_prefix": "Appilot:",
+    "error_occur_message": "An internal error occurred. Enter 'appilot_log' if you want to see the details.",
+    "no_error_message": "No error occurred.",
     "ask_approval": """
 The following action requires approval:
 
