@@ -179,7 +179,7 @@ class ListServiceResourcesTool(BaseTool):
     name = "get_service_resources"
     description = (
         "Get resources of a service. "
-        "Helpful to know what resources a service consists of, what status they are in. "
+        "Helpful to know what resources a service consists of, what status they are in. what keys they have."
         "Input should be id of a service. "
         "Output resource objects in json format."
     )
@@ -216,38 +216,6 @@ class GetServiceDependencyGraphTool(BaseTool):
             "service_id": text,
         }
         return f"```service_resource_graph\n{data}\n```"
-
-
-class GetServiceResourceKeysTool(BaseTool):
-    """Tool to get keys of a service resource."""
-
-    name = "get_service_resource_keys"
-    description = (
-        "Get keys of a service resource. "
-        "Key is identity of a service resource's component. It is needed when you need logs or terminal access of a resource. "
-        'Input should be a json with 2 keys: "service_id", "service_resource_id".'
-        "Output is keys in json format."
-    )
-    walrus_client: WalrusClient
-
-    def _run(self, text: str) -> str:
-        try:
-            input = json.loads(text)
-        except Exception as e:
-            return e
-        service_id = input["service_id"]
-        service_resource_id = input["service_resource_id"]
-
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
-        try:
-            keys = self.walrus_client.get_service_resource_keys(
-                project_id, environment_id, service_id, service_resource_id
-            )
-        except Exception as e:
-            return e
-
-        return keys
 
 
 class GetServiceResourceLogsTool(BaseTool):
@@ -288,7 +256,7 @@ class GetServiceResourceLogsTool(BaseTool):
         except Exception as e:
             return e
 
-        return log
+        return f"Here's the log:\n```{log}```\n"
 
 
 class ConstructServiceToCreateTool(BaseTool):

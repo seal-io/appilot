@@ -18,7 +18,6 @@ from tools.manage_service.tool import (
     ListServicesInAllEnvironmentsTool,
     ListServiceResourcesTool,
     GetServiceAccessEndpointsTool,
-    GetServiceResourceKeysTool,
     GetServiceResourceLogsTool,
     GetServiceDependencyGraphTool,
 )
@@ -74,7 +73,6 @@ def create_agent(
         UpdateServiceTool(walrus_client=walrus_client),
         DeleteServicesTool(walrus_client=walrus_client),
         ListServiceResourcesTool(walrus_client=walrus_client),
-        GetServiceResourceKeysTool(walrus_client=walrus_client),
         GetServiceResourceLogsTool(walrus_client=walrus_client),
         GetServiceAccessEndpointsTool(walrus_client=walrus_client),
         GetServiceDependencyGraphTool(walrus_client=walrus_client),
