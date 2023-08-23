@@ -26,7 +26,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to list projects: {response.text}")
 
         return response.json()["items"]
@@ -38,7 +38,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get project {project}: {response.text}"
             )
@@ -56,7 +56,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to list environments: {response.text}")
 
         return response.json()["items"]
@@ -69,7 +69,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get environment {environment}: {response.text}"
             )
@@ -85,7 +85,7 @@ class WalrusClient:
             json=data,
             **self.request_args,
         )
-        if response.status_code != 201:
+        if response.status_code >= 400:
             raise Exception(f"Failed to create environment: {response.text}")
 
         return response.text
@@ -103,7 +103,7 @@ class WalrusClient:
             json=body,
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to delete environment: {response.text}")
 
         return response.text
@@ -116,7 +116,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get environment dependency graph: {response.text}"
             )
@@ -136,7 +136,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to list services: {response.text}")
 
         return response.json()["items"]
@@ -157,7 +157,7 @@ class WalrusClient:
                 headers=self.headers(),
                 **self.request_args,
             )
-            if response.status_code != 200:
+            if response.status_code >= 400:
                 raise Exception(f"Failed to list services: {response.text}")
             services.extend(response.json()["items"])
 
@@ -174,7 +174,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to get service: {response.text}")
 
         return response.text
@@ -189,7 +189,7 @@ class WalrusClient:
             json=data,
             **self.request_args,
         )
-        if response.status_code != 201:
+        if response.status_code >= 400:
             raise Exception(f"Failed to create service: {response.text}")
 
         return response.text
@@ -208,7 +208,7 @@ class WalrusClient:
             data=data,
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to update service: {response.text}")
 
         return response.text
@@ -229,7 +229,7 @@ class WalrusClient:
             json=body,
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to delete service: {response.text}")
 
         return response.text
@@ -244,7 +244,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get service access endpoints: {response.text}"
             )
@@ -261,7 +261,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get service resources: {response.text}"
             )
@@ -282,7 +282,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get service resource keys: {response.text}"
             )
@@ -309,7 +309,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to get service resource logs: {response.text}"
             )
@@ -324,7 +324,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(f"Failed to list templates: {response.text}")
 
         templates = response.json()["items"]
@@ -343,7 +343,7 @@ class WalrusClient:
             headers=self.headers(),
             **self.request_args,
         )
-        if response.status_code != 200:
+        if response.status_code >= 400:
             raise Exception(
                 f"Failed to list template versions: {response.text}"
             )
