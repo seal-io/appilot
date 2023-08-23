@@ -91,14 +91,16 @@ class CreateServiceTool(RequireApprovalTool):
 
     def _run(self, text: str) -> str:
         try:
-            json.loads(text)
+            service = json.loads(text)
         except Exception as e:
             raise e
 
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         try:
-            self.walrus_client.create_service(project_id, environment_id, text)
+            self.walrus_client.create_service(
+                project_id, environment_id, service
+            )
         except Exception as e:
             return e
 
