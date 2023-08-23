@@ -76,6 +76,20 @@ class WalrusClient:
 
         return response.json()
 
+    def create_environment(self, project_id: str, data):
+        """Create an environment in a project."""
+
+        response = requests.post(
+            url=self.api_url + f"/v1/projects/{project_id}/environments",
+            headers=self.headers(),
+            json=data,
+            **self.request_args,
+        )
+        if response.status_code != 201:
+            raise Exception(f"Failed to create environment: {response.text}")
+
+        return response.text
+
     def delete_environments(self, project_id: str, ids: List[str]):
         """Delete one or multiple environments."""
         items = []
@@ -172,7 +186,7 @@ class WalrusClient:
             url=self.api_url
             + f"/v1/projects/{project_id}/environments/{environment_id}/services",
             headers=self.headers(),
-            data=data,
+            json=data,
             **self.request_args,
         )
         if response.status_code != 201:

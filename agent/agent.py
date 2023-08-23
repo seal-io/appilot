@@ -24,6 +24,7 @@ from tools.manage_service.tool import (
 )
 from tools.manage_context.tool import ChangeContextTool, CurrentContextTool
 from tools.manage_environment.tool import (
+    CloneEnvironmentTool,
     ListEnvironmentsTool,
     DeleteEnvironmentsTool,
     GetEnvironmentDependencyGraphTool,
@@ -60,6 +61,7 @@ def create_agent(
         ListProjectsTool(walrus_client=walrus_client),
         ListEnvironmentsTool(walrus_client=walrus_client),
         DeleteEnvironmentsTool(walrus_client=walrus_client),
+        CloneEnvironmentTool(walrus_client=walrus_client),
         GetEnvironmentDependencyGraphTool(walrus_client=walrus_client),
         MatchTemplateTool(llm=llm, walrus_client=walrus_client),
         GetTemplateSchemaTool(walrus_client=walrus_client),

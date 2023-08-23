@@ -64,3 +64,41 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
         }
         # graph_data = self.walrus_client.get_environment_graph(project_id, text)
         return f"```service_graph\n{data}\n```"
+
+
+class CloneEnvironmentTool(RequireApprovalTool):
+    """Tool to clone an environment."""
+
+    name = "clone_environment"
+    description = (
+        "Clone an environment to a new one. "
+        'Input should be a json string with two keys: "original_environment_name" and "target_environment_name".'
+    )
+
+    walrus_client: WalrusClient
+
+    def _run(self, text: str) -> str:
+        try:
+            data = json.loads(text)
+        except Exception as e:
+            return e
+
+        project_id = config.CONFIG.context.project_id
+        original_environment_name = data.get("original_environment_name")
+        target_environment_name = data.get("target_environment_name")
+
+        try:
+            environment = self.walrus_client.get_environment(
+                project_id, original_environment_name
+            )
+            services = self.walrus_client.list_services(
+                project_id, original_environment_name
+            )
+            environment["name"] = target_environment_name
+            environment["services"] = services
+
+            self.walrus_client.create_environment(project_id, environment)
+        except Exception as e:
+            return e
+
+        return "Successfully cloned."
