@@ -159,6 +159,11 @@ class WalrusClient:
             )
             if response.status_code >= 400:
                 raise Exception(f"Failed to list services: {response.text}")
+
+            services_in_env = response.json()["items"]
+            if services_in_env is None or len(services_in_env) == 0:
+                continue
+
             services.extend(response.json()["items"])
 
         return services
