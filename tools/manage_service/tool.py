@@ -139,12 +139,14 @@ class DeleteServicesTool(RequireApprovalTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
+        try:
+            ids = json.loads(query)
+        except Exception as e:
+            raise e
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         try:
-            self.walrus_client.delete_services(
-                project_id, environment_id, query
-            )
+            self.walrus_client.delete_services(project_id, environment_id, ids)
         except Exception as e:
             return e
 
