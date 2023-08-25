@@ -36,6 +36,26 @@ class ListServicesTool(BaseTool):
         return "No services found."
 
 
+class WatchServicesTool(BaseTool):
+    """Tool to watch services."""
+
+    name = "watch_services"
+    description = "Watch service changes in current environment."
+    walrus_client: WalrusClient
+
+    def _run(self, query: str) -> str:
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+
+        try:
+            self.walrus_client.watch_services(project_id, environment_id)
+        except KeyboardInterrupt:
+            # Ctrl+C detected. Stopping the request.
+            print("")
+
+        return text.get("watch_service_ending")
+
+
 class ListServicesInAllEnvironmentsTool(BaseTool):
     """Tool to list services in all environments."""
 

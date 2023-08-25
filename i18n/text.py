@@ -20,6 +20,8 @@ system_messages = {
     "rejected_message": "The action is rejected.",
     "no_error_message": "No error occurred.",
     "resource_log_prefix": "Here's the log:",
+    "watch_service_note": "( Enter <Ctrl + C> to halt )",
+    "watch_service_ending": "Halted.",
     "ask_approval": """
 The following action requires approval:
 

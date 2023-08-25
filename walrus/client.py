@@ -1,6 +1,9 @@
 import json
 from typing import List
+import click
 import requests
+from i18n import text
+from utils import utils
 
 
 class WalrusClient:
@@ -140,6 +143,58 @@ class WalrusClient:
             raise Exception(f"Failed to list services: {response.text}")
 
         return response.json()["items"]
+
+    def watch_services(self, project_id: str, environment_id: str):
+        """Watch services in a project and environment."""
+
+        def align_and_echo(data_list, width=30):
+            aligned_data = [item.ljust(width) for item in data_list]
+            click.echo("".join(aligned_data))
+
+        def print_service(s):
+            align_and_echo(
+                [
+                    s.get("name"),
+                    s.get("template").get("name"),
+                    s.get("status").get("summaryStatus"),
+                    utils.format_relative_time(s.get("createTime")),
+                ]
+            )
+
+        services = self.list_services(project_id, environment_id)
+        click.echo(text.get("watch_service_note"))
+        align_and_echo(
+            [
+                "NAME",
+                "TEMPLATE",
+                "STATUS",
+                "CREATE TIME",
+            ]
+        )
+        for service in services:
+            print_service(service)
+
+        params = {
+            "perPage": -1,
+            "watch": "true",
+        }
+
+        response = requests.get(
+            url=self.api_url
+            + f"/v1/projects/{project_id}/environments/{environment_id}/services",
+            params=params,
+            headers=self.headers(),
+            **self.request_args,
+            stream=True,
+        )
+        if response.status_code >= 400:
+            raise Exception(f"Failed to list services: {response.text}")
+
+        for chunk in response.iter_content(chunk_size=None):
+            event = json.loads(chunk.decode("utf-8"))
+            if "items" in event:
+                for item in event["items"]:
+                    print_service(item)
 
     def list_services_in_all_environments(self, project_id: str):
         """List services in all environments of a project."""

@@ -5,6 +5,9 @@ from i18n import text
 from colorama import Fore, Style
 from rich.markdown import Markdown
 from rich.console import Console
+from datetime import datetime
+from dateutil import parser
+from datetime import timezone
 
 console = Console()
 
@@ -36,3 +39,22 @@ def print_ai_response(message):
 def print_rejected_message():
     print(text.get("response_prefix"), end="")
     print(text.get("rejected_message"))
+
+
+def format_relative_time(iso_time):
+    parsed_time = parser.isoparse(iso_time)
+    current_time = datetime.now(timezone.utc)
+    time_difference = current_time - parsed_time
+
+    days = time_difference.days
+    hours = int(time_difference.total_seconds() // 3600)
+    minutes = int((time_difference.total_seconds() % 3600) // 60)
+
+    if days > 0:
+        return f"{days} Days ago"
+    elif hours > 0:
+        return f"{hours} Hours ago"
+    elif minutes > 0:
+        return f"{minutes} Minutes ago"
+    else:
+        return "Just now"
