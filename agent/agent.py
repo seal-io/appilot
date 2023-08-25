@@ -73,7 +73,9 @@ def create_agent(
         UpdateServiceTool(walrus_client=walrus_client),
         DeleteServicesTool(walrus_client=walrus_client),
         ListServiceResourcesTool(walrus_client=walrus_client),
-        GetServiceResourceLogsTool(walrus_client=walrus_client),
+        GetServiceResourceLogsTool(
+            walrus_client=walrus_client, return_direct=True
+        ),
         GetServiceAccessEndpointsTool(walrus_client=walrus_client),
         GetServiceDependencyGraphTool(walrus_client=walrus_client),
     ]

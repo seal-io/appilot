@@ -19,6 +19,7 @@ system_messages = {
     "error_occur_message": "An internal error occurred. Enter 'appilot_log' if you want to see the details.",
     "rejected_message": "The action is rejected.",
     "no_error_message": "No error occurred.",
+    "resource_log_prefix": "Here's the log:",
     "ask_approval": """
 The following action requires approval:
 

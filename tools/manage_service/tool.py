@@ -1,6 +1,6 @@
 import json
-from typing import Any
 from config import config
+from i18n import text
 from walrus.client import WalrusClient
 from langchain.agents.tools import BaseTool
 from langchain import LLMChain
@@ -230,15 +230,15 @@ class GetServiceResourceLogsTool(BaseTool):
         "Get logs of a service resource. "
         "Before using this tool, you should get keys of the resource first."
         'Input should be a json with 4 keys: "service_id", "service_resource_id", "key", "line_number".'
-        '"key" is identity of a service resource\'s component. It is required when you need logs or terminal access of a resource. '
+        '"key" is identity of a service resource\'s component. You can get available keys by listing service resources. '
         '"line_number" is the number of lines of logs to get. defaults to 100 if user does not specify. '
         "Output is log text."
     )
     walrus_client: WalrusClient
 
-    def _run(self, text: str) -> str:
+    def _run(self, query: str) -> str:
         try:
-            input = json.loads(text)
+            input = json.loads(query)
         except Exception as e:
             raise e
         service_id = input.get("service_id")
@@ -260,7 +260,8 @@ class GetServiceResourceLogsTool(BaseTool):
         except Exception as e:
             return e
 
-        return f"Here's the log:\n```{log}```\n"
+        prefix = text.get("resource_log_prefix")
+        return f"{prefix}\n```{log}```"
 
 
 class ConstructServiceToCreateTool(BaseTool):
