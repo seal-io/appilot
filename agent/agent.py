@@ -63,7 +63,9 @@ def create_agent(
         ListEnvironmentsTool(walrus_client=walrus_client),
         DeleteEnvironmentsTool(walrus_client=walrus_client),
         CloneEnvironmentTool(walrus_client=walrus_client),
-        GetEnvironmentDependencyGraphTool(walrus_client=walrus_client),
+        GetEnvironmentDependencyGraphTool(
+            walrus_client=walrus_client, return_direct=True
+        ),
         MatchTemplateTool(llm=llm, walrus_client=walrus_client),
         GetTemplateSchemaTool(walrus_client=walrus_client),
         ConstructServiceToCreateTool(llm=llm, walrus_client=walrus_client),

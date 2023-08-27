@@ -124,7 +124,7 @@ class WalrusClient:
                 f"Failed to get environment dependency graph: {response.text}"
             )
 
-        return response.text
+        return response.json()
 
     def list_services(self, project_id: str, environment_id: str):
         """List services in a project and environment."""

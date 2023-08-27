@@ -23,6 +23,7 @@ system_messages = {
     "resource_log_prefix": "Here's the log:",
     "watch_service_note": "( Enter <Ctrl + C> to halt )",
     "watch_service_ending": "Halted.",
+    "show_graph_message": "The dependency graph is shown to you.",
     "inform_ready_start": "Start watching. Will inform when it's ready.",
     "service_ready_message": "Service {} is Ready.",
     "ask_approval": """

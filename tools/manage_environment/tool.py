@@ -1,9 +1,13 @@
 import json
+import os
 from typing import Any
 from langchain.agents.tools import BaseTool
 from config import config
+from i18n import text
 from walrus.client import WalrusClient
 from tools.base.tools import RequireApprovalTool
+import pydot
+from PIL import Image
 
 
 class ListEnvironmentsTool(BaseTool):
@@ -54,21 +58,66 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
     """Tool to get environment dependency graph."""
 
     name = "get_environment_dependency_graph"
-    description = (
-        "Get dependency graph of an environment. Input should be an environment id."
-        "Output is a json data wrapped in triple backticks, representing the dependency graph."
-        "You can directly return the output to the user. No need to reformat. "
-        "UI can use this data to render the graph."
-    )
+    description = "Get dependency graph of an environment. Input should be name or id of an environment."
     walrus_client: WalrusClient
 
-    def _run(self, text: str) -> str:
-        data = {
-            "project_id": config.CONFIG.context.project_id,
-            "environment_id": text,
+    def show_graph(self, graph_data: dict):
+        node_shape_map = {
+            "Service": "box",
+            "ServiceResourceGroup": "ellipse",
+            "ServiceResource": "ellipse",
         }
-        # graph_data = self.walrus_client.get_environment_graph(project_id, text)
-        return f"```service_graph\n{data}\n```"
+        edge_style_map = {
+            "Composition": "composition",
+            "Realization": "dashed",
+        }
+
+        node_height = 1
+        graph = pydot.Dot(graph_type="digraph")
+        for vertex in graph_data["vertices"]:
+            label_suffix = ""
+            if vertex["kind"] == "Service":
+                label_suffix = "<br/>service"
+            else:
+                label_suffix = f"<br/>{vertex['extensions']['type']}"
+
+            graph.add_node(
+                pydot.Node(
+                    name=vertex["id"],
+                    label=f"<{vertex['name']}{label_suffix}>",
+                    shape=node_shape_map[vertex["kind"]],
+                    height=node_height,
+                )
+            )
+
+        for edge in graph_data["edges"]:
+            graph.add_edge(
+                pydot.Edge(
+                    edge.get("start").get("id"),
+                    edge.get("end").get("id"),
+                    style=edge_style_map[edge.get("type")],
+                )
+            )
+
+        output_directory = "/tmp/appilot"
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        image_path = os.path.join(output_directory, "dependency_graph.png")
+        graph.write_png(image_path)
+        image = Image.open(image_path)
+        image.show()
+
+    def _run(self, environment: str) -> str:
+        project_id = config.CONFIG.context.project_id
+        if environment is None or environment == "":
+            environment = config.CONFIG.context.environment_id
+
+        graph_data = self.walrus_client.get_environment_graph(
+            project_id, environment
+        )
+        self.show_graph(graph_data)
+
+        return text.get("show_graph_message")
 
 
 class CloneEnvironmentTool(RequireApprovalTool):
