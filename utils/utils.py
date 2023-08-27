@@ -1,4 +1,5 @@
 import os
+import sys
 
 from i18n import text
 
@@ -10,6 +11,8 @@ from dateutil import parser
 from datetime import timezone
 
 console = Console()
+
+inform_sent = False
 
 
 def get_env(key: str, default: str = "") -> str:
@@ -29,6 +32,27 @@ def get_env_bool(key: str, default: bool = False) -> bool:
 
 def print_ai_reasoning(message):
     print(Fore.CYAN + text.get("ai_reasoning") + message + Style.RESET_ALL)
+
+
+def print_ai_inform(message):
+    global inform_sent
+    inform_sent = True
+    # move cursor to the end of previous line
+    sys.stdout.write("\033[F\033[1000C")
+    print(
+        Fore.LIGHTYELLOW_EX
+        + "\n"
+        + text.get("inform_prefix")
+        + message
+        + Style.RESET_ALL
+    )
+
+
+def is_inform_sent():
+    global inform_sent
+    if inform_sent:
+        inform_sent = False
+        return True
 
 
 def print_ai_response(message):

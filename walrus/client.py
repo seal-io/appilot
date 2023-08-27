@@ -237,7 +237,7 @@ class WalrusClient:
         if response.status_code >= 400:
             raise Exception(f"Failed to get service: {response.text}")
 
-        return response.text
+        return response.json()
 
     def create_service(self, project_id: str, environment_id: str, data):
         """Create a service in a project and environment."""

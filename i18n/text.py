@@ -16,12 +16,15 @@ system_messages = {
     "welcome": "Appilot: What can I help?",
     "ai_reasoning": "Appilot reasoning:",
     "response_prefix": "Appilot:",
+    "inform_prefix": "Appilot[inform]:",
     "error_occur_message": "An internal error occurred. Enter 'appilot_log' if you want to see the details.",
     "rejected_message": "The action is rejected.",
     "no_error_message": "No error occurred.",
     "resource_log_prefix": "Here's the log:",
     "watch_service_note": "( Enter <Ctrl + C> to halt )",
     "watch_service_ending": "Halted.",
+    "inform_ready_start": "Start watching. Will inform when it's ready.",
+    "service_ready_message": "Service {} is Ready.",
     "ask_approval": """
 The following action requires approval:
 

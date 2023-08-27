@@ -54,6 +54,8 @@ def run():
         elif user_query == "appilot_log":
             print_last_error()
             continue
+        elif utils.is_inform_sent():
+            continue
 
         try:
             result = appilot_agent.run(user_query)

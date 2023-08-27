@@ -1,4 +1,9 @@
+import asyncio
 import json
+import threading
+import time
+
+from utils import utils
 from config import config
 from i18n import text
 from walrus.client import WalrusClient
@@ -7,6 +12,7 @@ from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from tools.base.tools import RequireApprovalTool
+from langchain.callbacks.base import AsyncCallbackHandler
 from tools.manage_service.prompt import (
     CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
     CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
@@ -54,6 +60,38 @@ class WatchServicesTool(BaseTool):
             print("")
 
         return text.get("watch_service_ending")
+
+
+class InformServiceReadyTool(BaseTool):
+    """Tool to inform user when service becomes ready."""
+
+    name = "inform_service_ready"
+    description = "Inform user when a service becomes ready. Input should be name or id of a service."
+    walrus_client: WalrusClient
+
+    def watch_service_ready(self, input: str):
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+        start_time = time.time()
+        timeout = 180
+        while True:
+            time.sleep(3)
+            if time.time() - start_time > timeout:
+                break
+            service = self.walrus_client.get_service_by_name(
+                project_id, environment_id, input
+            )
+            if service.get("status").get("summaryStatus") == "Ready":
+                utils.print_ai_inform(
+                    text.get("service_ready_message").format(input)
+                )
+                break
+
+    def _run(self, input: str) -> str:
+        threading.Thread(
+            target=self.watch_service_ready, args=(input,)
+        ).start()
+        return text.get("inform_ready_start")
 
 
 class ListServicesInAllEnvironmentsTool(BaseTool):
