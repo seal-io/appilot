@@ -191,16 +191,16 @@ class DeleteServicesTool(RequireApprovalTool):
     """Tool to delete one or multiple services."""
 
     name = "delete_services"
-    description = (
-        "Delete one or multiple services. Input should be ids of services."
-    )
+    description = 'Delete one or multiple services. Input should be a list of object, each object contains 2 keys, "name" and "id" of a service.'
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
         try:
-            ids = json.loads(query)
+            services = json.loads(query)
         except Exception as e:
             raise e
+
+        ids = [service["id"] for service in services if "id" in service]
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         try:

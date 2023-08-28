@@ -36,15 +36,16 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
     """Tool to delete environments."""
 
     name = "delete_environments"
-    description = "Delete one or multiple environments. Input should be a list of environment ids."
+    description = 'Delete one or multiple environments. Input should be a list of object, each object contains 2 keys, "name" and "id" of an environment.'
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
         try:
-            ids = json.loads(text)
+            environments = json.loads(text)
         except Exception as e:
-            return e
+            raise e
 
+        ids = [env["id"] for env in environments if "id" in env]
         project_id = config.CONFIG.context.project_id
         try:
             self.walrus_client.delete_environments(project_id, ids)
