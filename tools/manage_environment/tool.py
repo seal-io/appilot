@@ -52,7 +52,7 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
         except Exception as e:
             return e
 
-        return "Successfully deleted."
+        return "Deletion started."
 
 
 class GetEnvironmentDependencyGraphTool(BaseTool):
