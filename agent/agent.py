@@ -21,6 +21,7 @@ from tools.manage_service.tool import (
     ListServiceResourcesTool,
     GetServiceAccessEndpointsTool,
     GetServiceResourceLogsTool,
+    GetServiceResourceLogsReturnDirectTool,
     GetServiceDependencyGraphTool,
 )
 from tools.manage_context.tool import ChangeContextTool, CurrentContextTool
@@ -81,7 +82,8 @@ def create_agent(
         UpdateServiceTool(walrus_client=walrus_client),
         DeleteServicesTool(walrus_client=walrus_client),
         ListServiceResourcesTool(walrus_client=walrus_client),
-        GetServiceResourceLogsTool(
+        GetServiceResourceLogsTool(walrus_client=walrus_client),
+        GetServiceResourceLogsReturnDirectTool(
             walrus_client=walrus_client, return_direct=True
         ),
         GetServiceAccessEndpointsTool(walrus_client=walrus_client),

@@ -283,9 +283,51 @@ class GetServiceDependencyGraphTool(BaseTool):
 class GetServiceResourceLogsTool(BaseTool):
     """Tool to get logs of a service resource."""
 
-    name = "get_service_resource_logs"
+    name = "get_service_resource_logs_for_diagnose"
     description = (
-        "Get logs of a service resource. "
+        "Get logs of a service resource. Use when you need to diagnose service error with logs."
+        "Before using this tool, you should get keys of the resource first."
+        'Input should be a json with 4 keys: "service_id", "service_resource_id", "key", "line_number".'
+        '"key" is identity of a service resource\'s component. You can get available keys by listing service resources. '
+        '"line_number" is the number of lines of logs to get. defaults to 100 if user does not specify. '
+        "Output is log text."
+    )
+    walrus_client: WalrusClient
+
+    def _run(self, query: str) -> str:
+        try:
+            input = json.loads(query)
+        except Exception as e:
+            raise e
+        service_id = input.get("service_id")
+        service_resource_id = input.get("service_resource_id")
+        key = input.get("key")
+        line_number = input.get("line_number", 100)
+
+        project_id = config.CONFIG.context.project_id
+        environment_id = config.CONFIG.context.environment_id
+        try:
+            log = self.walrus_client.get_service_resource_logs(
+                project_id,
+                environment_id,
+                service_id,
+                service_resource_id,
+                key,
+                line_number,
+            )
+        except Exception as e:
+            return e
+
+        prefix = text.get("resource_log_prefix")
+        return f"{prefix}\n```{log}```"
+
+
+class GetServiceResourceLogsReturnDirectTool(BaseTool):
+    """Tool to get logs of a service resource."""
+
+    name = "get_service_resource_logs_return_direct"
+    description = (
+        "Get logs of a service resource. The logs will be shown to users directly. Useful when users want to see logs."
         "Before using this tool, you should get keys of the resource first."
         'Input should be a json with 4 keys: "service_id", "service_resource_id", "key", "line_number".'
         '"key" is identity of a service resource\'s component. You can get available keys by listing service resources. '

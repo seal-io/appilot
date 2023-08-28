@@ -75,14 +75,20 @@ def set_show_reasoning(show_reasoning: bool):
     CONFIG.show_reasoning = show_reasoning
 
 
-def update_context(context: Context):
+def update_context(context):
     global CONFIG
-    if context.project_id != "" and context.project_name != "":
-        CONFIG.context.project_id = context.project_id
-        CONFIG.context.project_name = context.project_name
-    if context.environment_id != "" and context.environment_name != "":
-        CONFIG.context.environment_id = context.environment_id
-        CONFIG.context.environment_name = context.environment_name
+    if (
+        context.get("project_id") is not None
+        and context.get("project_name") != ""
+    ):
+        CONFIG.context.project_id = context.get("project_id")
+        CONFIG.context.project_name = context.get("project_name")
+    if (
+        context.get("environment_id") is not None
+        and context.get("environment_name") != ""
+    ):
+        CONFIG.context.environment_id = context.get("environment_id")
+        CONFIG.context.environment_name = context.get("environment_name")
 
 
 def _default_context(walrus_url: str, walrus_api_key: str) -> Context:
