@@ -73,7 +73,7 @@ class InformServiceReadyTool(BaseTool):
         project_id = config.CONFIG.context.project_id
         environment_id = config.CONFIG.context.environment_id
         start_time = time.time()
-        timeout = 180
+        timeout = 600
         while True:
             time.sleep(3)
             if time.time() - start_time > timeout:
