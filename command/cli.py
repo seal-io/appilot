@@ -47,14 +47,14 @@ def run():
     user_query = None
     while True:
         user_query = input(">")
-        if not user_query.strip():
+        if utils.is_inform_sent():
             continue
         elif user_query == "exit":
             break
         elif user_query == "appilot_log":
             print_last_error()
             continue
-        elif utils.is_inform_sent():
+        elif not user_query.strip():
             continue
 
         try:
