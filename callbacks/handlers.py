@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional, List, Union
 from uuid import UUID
 import click
@@ -10,6 +11,9 @@ from langchain.callbacks.base import BaseCallbackHandler, LLMManagerMixin
 from langchain.schema.output import LLMResult
 from langchain.schema.agent import AgentAction, AgentFinish
 from langchain.schema.output import LLMResult
+from pygments import highlight
+from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalFormatter
 
 
 class HumanRejectedException(Exception):
@@ -37,6 +41,16 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
 
     def _approve(self, _input: str, serialized: Dict[str, Any]) -> bool:
         message = text.get("ask_approval")
+
+        try:
+            json_input = json.loads(_input)
+        except Exception as e:
+            # If the input is not a valid JSON, just pass
+            pass
+        else:
+            # Serialize the JSON input with colors
+            json_string = json.dumps(json_input, indent=4)
+            _input = highlight(json_string, JsonLexer(), TerminalFormatter())
 
         return click.confirm(
             message.format(input=_input, tool_name=serialized["name"]),
