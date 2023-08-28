@@ -5,6 +5,7 @@ For your reference, you will be provided existing services and related template 
 You should:
 1) evaluate whether the service object can be constructed according to the user query. If no, say why.
 2) if yes, output in the following format:
+3) for sensitive attributes, reference existing variables in the format `${{var.variable_name}}`.
 
 CONSTRUCTED SERVICE: <SERVICE_OBJECT_IN_ONE_LINE_JSON>
 
