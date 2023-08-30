@@ -35,6 +35,8 @@ def init():
     openai_api_key = utils.get_env("OPENAI_API_KEY")
     walrus_api_key = utils.get_env("WALRUS_API_KEY")
     walrus_url = utils.get_env("WALRUS_URL")
+    walrus_default_project = utils.get_env("WALRUS_DEFAULT_PROJECT")
+    walrus_default_environment = utils.get_env("WALRUS_DEFAULT_ENVIRONMENT")
     natural_language = utils.get_env("NATURAL_LANGUAGE", "English")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
@@ -51,7 +53,12 @@ def init():
         raise Exception("OPENAI_API_KEY is not set")
 
     global CONFIG
-    context = _default_context(walrus_url, walrus_api_key)
+    context = _default_context(
+        walrus_url,
+        walrus_api_key,
+        walrus_default_project,
+        walrus_default_environment,
+    )
     CONFIG = Config(
         openai_api_base=openai_api_base,
         openai_api_key=openai_api_key,
@@ -91,27 +98,38 @@ def update_context(context):
         CONFIG.context.environment_name = context.get("environment_name")
 
 
-def _default_context(walrus_url: str, walrus_api_key: str) -> Context:
+def _default_context(
+    walrus_url: str,
+    walrus_api_key: str,
+    default_project: str = "",
+    default_environment: str = "",
+) -> Context:
     walrus_client = WalrusClient(
         walrus_url,
         walrus_api_key,
         verify=False,
     )
-    context = Context()
-    projects = walrus_client.list_projects()
-    if len(projects) > 0:
-        project = projects[0]
-        context = Context(
-            project_id=project["id"],
-            project_name=project["name"],
+    if default_project != "" and default_environment != "":
+        project = walrus_client.get_project(default_project)
+        environment = walrus_client.get_environment(
+            default_project, default_environment
         )
     else:
-        # no project found
-        return context
-
-    environments = walrus_client.list_environments(context.project_id)
-    if len(environments) > 0:
+        # Get the first project and environment if not specified.
+        projects = walrus_client.list_projects()
+        if projects is None or len(projects) == 0:
+            raise Exception("No available project. A project is required.")
+        project = projects[0]
+        environments = walrus_client.list_environments(project.get("id"))
+        if environments is None or len(environments) == 0:
+            raise Exception(
+                "No aviailable environment. An environment is required."
+            )
         environment = environments[0]
-        context.environment_id = environment["id"]
-        context.environment_name = environment["name"]
-    return context
+
+    return Context(
+        project_id=project.get("id"),
+        project_name=project.get("name"),
+        environment_id=environment.get("id"),
+        environment_name=environment.get("name"),
+    )
