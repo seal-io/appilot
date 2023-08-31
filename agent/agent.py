@@ -7,6 +7,7 @@ from agent.prompt import (
     AGENT_PROMPT_PREFIX,
     FORMAT_INSTRUCTIONS_TEMPLATE,
 )
+from tools.general.tools import BrowseURLTool
 from tools.manage_service.tool import (
     ConstructServiceToCreateTool,
     ConstructServiceToUpdateTool,
@@ -87,6 +88,7 @@ def create_agent(
             walrus_client=walrus_client, return_direct=True
         ),
         GetServiceAccessEndpointsTool(walrus_client=walrus_client),
+        BrowseURLTool(),
         GetServiceDependencyGraphTool(walrus_client=walrus_client),
     ]
 
