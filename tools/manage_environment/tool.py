@@ -70,7 +70,8 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
         }
         edge_style_map = {
             "Composition": "composition",
-            "Realization": "dashed",
+            "Realization": "dotted",
+            "Dependency": "dashed",
         }
 
         node_height = 1
