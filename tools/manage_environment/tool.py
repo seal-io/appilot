@@ -76,6 +76,7 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
 
         node_height = 1
         graph = pydot.Dot(graph_type="digraph")
+        node_ids = []
         for vertex in graph_data["vertices"]:
             label_suffix = ""
             if vertex["kind"] == "Service":
@@ -91,8 +92,21 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
                     height=node_height,
                 )
             )
+            node_ids.append(vertex["id"])
 
+        edge_ids = []
         for edge in graph_data["edges"]:
+            # FIXME: This is a hack to avoid edges that are not in the graph. resolve in API.
+            if (
+                edge.get("start").get("id") not in node_ids
+                or edge.get("end").get("id") not in node_ids
+            ):
+                continue
+            # FIXME: This is a hack to avoid duplicate edges. resolve in API.
+            edge_id = edge.get("start").get("id") + edge.get("end").get("id")
+            if edge_id in edge_ids:
+                continue
+
             graph.add_edge(
                 pydot.Edge(
                     edge.get("start").get("id"),
@@ -100,6 +114,7 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
                     style=edge_style_map[edge.get("type")],
                 )
             )
+            edge_ids.append(edge_id)
 
         output_directory = "/tmp/appilot"
         if not os.path.exists(output_directory):
