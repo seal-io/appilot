@@ -21,7 +21,7 @@ def setup_agent() -> Any:
 
     llm = ChatOpenAI(
         model_name="gpt-4",
-        temperature=0.0,
+        temperature=0,
         callbacks=[handlers.PrintReasoningCallbackHandler()],
     )
 

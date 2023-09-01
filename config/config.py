@@ -1,3 +1,4 @@
+import logging
 from utils import utils
 import urllib3
 
@@ -51,6 +52,9 @@ def init():
         raise Exception("WALRUS_API_KEY is not set")
     if not openai_api_key:
         raise Exception("OPENAI_API_KEY is not set")
+
+    if not verbose:
+        logging.basicConfig(level=logging.CRITICAL)
 
     global CONFIG
     context = _default_context(
