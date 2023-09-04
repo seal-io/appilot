@@ -1,6 +1,5 @@
 import json
 from langchain.agents.tools import BaseTool
-from config import config
 from walrus.client import WalrusClient
 
 

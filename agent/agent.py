@@ -1,39 +1,13 @@
 from typing import Any, Dict, Optional
 
 from config import config
+from walrus.toolkit import WalrusToolKit
 from walrus.client import WalrusClient
 from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
     FORMAT_INSTRUCTIONS_TEMPLATE,
 )
-from tools.general.tools import BrowseURLTool
-from tools.manage_service.tool import (
-    ConstructServiceToCreateTool,
-    ConstructServiceToUpdateTool,
-    GetServicesTool,
-    CreateServiceTool,
-    UpdateServiceTool,
-    DeleteServicesTool,
-    ListServicesTool,
-    WatchServicesTool,
-    InformServiceReadyTool,
-    ListServicesInAllEnvironmentsTool,
-    ListServiceResourcesTool,
-    GetServiceAccessEndpointsTool,
-    GetServiceResourceLogsTool,
-    GetServiceResourceLogsReturnDirectTool,
-    GetServiceDependencyGraphTool,
-)
-from tools.manage_context.tool import ChangeContextTool, CurrentContextTool
-from tools.manage_environment.tool import (
-    CloneEnvironmentTool,
-    ListEnvironmentsTool,
-    DeleteEnvironmentsTool,
-    GetEnvironmentDependencyGraphTool,
-)
-from tools.manage_project.tool import ListProjectsTool
-from tools.manage_template.tool import MatchTemplateTool, GetTemplateSchemaTool
 from tools.human.tool import HumanTool
 
 from langchain.agents.agent import AgentExecutor
@@ -59,38 +33,10 @@ def create_agent(
         HumanTool(),
         ShowReasoningTool(),
         HideReasoningTool(),
-        CurrentContextTool(),
-        ChangeContextTool(walrus_client=walrus_client),
-        ListProjectsTool(walrus_client=walrus_client),
-        ListEnvironmentsTool(walrus_client=walrus_client),
-        DeleteEnvironmentsTool(walrus_client=walrus_client),
-        CloneEnvironmentTool(walrus_client=walrus_client),
-        GetEnvironmentDependencyGraphTool(
-            walrus_client=walrus_client, return_direct=True
-        ),
-        MatchTemplateTool(llm=llm, walrus_client=walrus_client),
-        GetTemplateSchemaTool(walrus_client=walrus_client),
-        ConstructServiceToCreateTool(llm=llm, walrus_client=walrus_client),
-        ConstructServiceToUpdateTool(llm=llm, walrus_client=walrus_client),
-        GetServicesTool(walrus_client=walrus_client),
-        ListServicesTool(walrus_client=walrus_client),
-        WatchServicesTool(walrus_client=walrus_client, return_direct=True),
-        InformServiceReadyTool(
-            walrus_client=walrus_client, return_direct=True
-        ),
-        ListServicesInAllEnvironmentsTool(walrus_client=walrus_client),
-        CreateServiceTool(walrus_client=walrus_client),
-        UpdateServiceTool(walrus_client=walrus_client),
-        DeleteServicesTool(walrus_client=walrus_client),
-        ListServiceResourcesTool(walrus_client=walrus_client),
-        GetServiceResourceLogsTool(walrus_client=walrus_client),
-        GetServiceResourceLogsReturnDirectTool(
-            walrus_client=walrus_client, return_direct=True
-        ),
-        GetServiceAccessEndpointsTool(walrus_client=walrus_client),
-        BrowseURLTool(),
-        GetServiceDependencyGraphTool(walrus_client=walrus_client),
     ]
+
+    walrus_toolkit = WalrusToolKit(llm=llm, walrus_client=walrus_client)
+    tools.extend(walrus_toolkit.get_tools())
 
     format_instructions = FORMAT_INSTRUCTIONS_TEMPLATE.format(
         natural_language=config.CONFIG.natural_language

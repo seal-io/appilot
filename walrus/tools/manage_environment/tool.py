@@ -1,6 +1,5 @@
 import json
 import os
-from typing import Any
 from langchain.agents.tools import BaseTool
 from config import config
 from i18n import text

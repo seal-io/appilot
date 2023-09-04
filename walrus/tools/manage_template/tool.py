@@ -4,7 +4,7 @@ from langchain import LLMChain
 from langchain.agents.tools import BaseTool
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
-from tools.manage_template.prompt import FIND_TEMPLATE_PROMPT
+from walrus.tools.manage_template.prompt import FIND_TEMPLATE_PROMPT
 from walrus.client import WalrusClient
 
 

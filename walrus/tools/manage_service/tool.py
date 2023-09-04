@@ -12,8 +12,7 @@ from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from tools.base.tools import RequireApprovalTool
-from langchain.callbacks.base import AsyncCallbackHandler
-from tools.manage_service.prompt import (
+from walrus.tools.manage_service.prompt import (
     CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
     CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
 )
