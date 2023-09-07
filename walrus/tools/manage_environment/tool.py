@@ -1,12 +1,13 @@
 import json
 import os
 from langchain.agents.tools import BaseTool
-from config import config
 from i18n import text
-from walrus.client import WalrusClient
 from tools.base.tools import RequireApprovalTool
 import pydot
 from PIL import Image
+
+from walrus.client import WalrusClient
+from walrus import context as walrus_context
 
 
 class ListEnvironmentsTool(BaseTool):
@@ -21,7 +22,7 @@ class ListEnvironmentsTool(BaseTool):
 
     def _run(self, project_id: str) -> str:
         if project_id == "":
-            project_id = config.CONFIG.context.project_id
+            project_id = walrus_context.GLOBAL_CONTEXT.project_id
         try:
             environments = self.walrus_client.list_environments(project_id)
         except Exception as e:
@@ -45,7 +46,7 @@ class DeleteEnvironmentsTool(RequireApprovalTool):
             raise e
 
         ids = [env["id"] for env in environments if "id" in env]
-        project_id = config.CONFIG.context.project_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
         try:
             self.walrus_client.delete_environments(project_id, ids)
         except Exception as e:
@@ -124,9 +125,9 @@ class GetEnvironmentDependencyGraphTool(BaseTool):
         image.show()
 
     def _run(self, environment: str) -> str:
-        project_id = config.CONFIG.context.project_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
         if environment is None or environment == "":
-            environment = config.CONFIG.context.environment_id
+            environment = walrus_context.GLOBAL_CONTEXT.environment_id
 
         graph_data = self.walrus_client.get_environment_graph(
             project_id, environment
@@ -153,7 +154,7 @@ class CloneEnvironmentTool(RequireApprovalTool):
         except Exception as e:
             return e
 
-        project_id = config.CONFIG.context.project_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
         original_environment_name = data.get("original_environment_name")
         target_environment_name = data.get("target_environment_name")
 

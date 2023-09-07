@@ -1,7 +1,7 @@
 import json
 from langchain.agents.tools import BaseTool
-from config import config
 from walrus.client import WalrusClient
+from walrus import context as walrus_context
 
 
 class CurrentContextTool(BaseTool):
@@ -11,7 +11,7 @@ class CurrentContextTool(BaseTool):
     description = "Get current project and environment context."
 
     def _run(self, query: str) -> str:
-        return json.dumps(config.CONFIG.context.__dict__)
+        return json.dumps(walrus_context.GLOBAL_CONTEXT.__dict__)
 
 
 class ChangeContextTool(BaseTool):
@@ -32,7 +32,7 @@ class ChangeContextTool(BaseTool):
         except Exception as e:
             return e
 
-        project_id = config.CONFIG.context.project_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
         if "project_name" in context and context["project_name"] != "":
             try:
                 project = self.walrus_client.get_project(
@@ -52,4 +52,4 @@ class ChangeContextTool(BaseTool):
                 return e
             context["environment_id"] = environment["id"]
 
-        config.update_context(context)
+        walrus_context.update_context(context)

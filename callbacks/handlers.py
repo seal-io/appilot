@@ -68,7 +68,7 @@ class PrintReasoningCallbackHandler(BaseCallbackHandler):
         tags: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> None:
-        if not config.CONFIG.show_reasoning:
+        if not config.APPILOT_CONFIG.show_reasoning:
             return
 
         generation_text = response.generations[0][0].text

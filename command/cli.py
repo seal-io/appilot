@@ -4,7 +4,6 @@ import readline
 from callbacks import handlers
 from config import config
 from i18n import text
-from walrus.client import WalrusClient
 from utils import utils
 from agent.agent import create_agent
 
@@ -27,16 +26,10 @@ def setup_agent() -> Any:
 
     text.init_system_messages(llm)
 
-    walrus_client = WalrusClient(
-        config.CONFIG.walrus_url,
-        config.CONFIG.walrus_api_key,
-        verify=(not config.CONFIG.skip_tls_verify),
-    )
-
     memory = ConversationBufferMemory(memory_key="chat_history")
 
     return create_agent(
-        walrus_client, llm, shared_memory=memory, verbose=config.CONFIG.verbose
+        llm, shared_memory=memory, verbose=config.APPILOT_CONFIG.verbose
     )
 
 

@@ -1,3 +1,5 @@
+import urllib3
+from walrus import context
 from walrus.tools.general.tools import BrowseURLTool
 from walrus.tools.manage_context.tool import (
     ChangeContextTool,
@@ -33,6 +35,7 @@ from walrus.tools.manage_template.tool import (
 )
 from walrus.client import WalrusClient
 from langchain.schema.language_model import BaseLanguageModel
+from utils import utils
 
 
 class WalrusToolKit:
@@ -41,9 +44,39 @@ class WalrusToolKit:
     walrus_client: WalrusClient
     llm: BaseLanguageModel
 
-    def __init__(self, llm: BaseLanguageModel, walrus_client: WalrusClient):
+    def __init__(self, llm: BaseLanguageModel):
         self.llm = llm
-        self.walrus_client = walrus_client
+        self.init_client()
+
+    def init_client(self):
+        walrus_api_key = utils.get_env("WALRUS_API_KEY")
+        walrus_url = utils.get_env("WALRUS_URL")
+        walrus_default_project = utils.get_env("WALRUS_DEFAULT_PROJECT")
+        walrus_default_environment = utils.get_env(
+            "WALRUS_DEFAULT_ENVIRONMENT"
+        )
+        walrus_skip_tls_verify = utils.get_env_bool(
+            "WALRUS_SKIP_TLS_VERIFY", False
+        )
+        if walrus_skip_tls_verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        if not walrus_url:
+            raise Exception("WALRUS_URL is not set")
+        if not walrus_api_key:
+            raise Exception("WALRUS_API_KEY is not set")
+
+        self.walrus_client = WalrusClient(
+            walrus_url,
+            walrus_api_key,
+            verify=(not walrus_skip_tls_verify),
+        )
+        context.set_default(
+            walrus_url=walrus_url,
+            walrus_api_key=walrus_api_key,
+            default_project=walrus_default_project,
+            default_environment=walrus_default_environment,
+        )
 
     def get_tools(self):
         walrus_client = self.walrus_client

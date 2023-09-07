@@ -2,7 +2,6 @@ from typing import Any, Dict, Optional
 
 from config import config
 from walrus.toolkit import WalrusToolKit
-from walrus.client import WalrusClient
 from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
 from agent.prompt import (
     AGENT_PROMPT_PREFIX,
@@ -19,7 +18,6 @@ from langchain.schema.language_model import BaseLanguageModel
 
 
 def create_agent(
-    walrus_client: WalrusClient,
     llm: BaseLanguageModel,
     shared_memory: Optional[ReadOnlySharedMemory] = None,
     callback_manager: Optional[BaseCallbackManager] = None,
@@ -35,11 +33,11 @@ def create_agent(
         HideReasoningTool(),
     ]
 
-    walrus_toolkit = WalrusToolKit(llm=llm, walrus_client=walrus_client)
+    walrus_toolkit = WalrusToolKit(llm=llm)
     tools.extend(walrus_toolkit.get_tools())
 
     format_instructions = FORMAT_INSTRUCTIONS_TEMPLATE.format(
-        natural_language=config.CONFIG.natural_language
+        natural_language=config.APPILOT_CONFIG.natural_language
     )
     prompt = ConversationalAgent.create_prompt(
         tools,
@@ -49,7 +47,7 @@ def create_agent(
 
     agent = ConversationalAgent(
         llm_chain=LLMChain(
-            llm=llm, prompt=prompt, verbose=config.CONFIG.verbose
+            llm=llm, prompt=prompt, verbose=config.APPILOT_CONFIG.verbose
         ),
         allowed_tools=[tool.name for tool in tools],
         **kwargs,

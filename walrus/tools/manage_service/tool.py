@@ -1,10 +1,8 @@
-import asyncio
 import json
 import threading
 import time
 
 from utils import utils
-from config import config
 from i18n import text
 from walrus.client import WalrusClient
 from langchain.agents.tools import BaseTool
@@ -12,6 +10,7 @@ from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from tools.base.tools import RequireApprovalTool
+from walrus import context as walrus_context
 from walrus.tools.manage_service.prompt import (
     CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
     CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
@@ -26,8 +25,8 @@ class ListServicesTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             services = self.walrus_client.list_services(
                 project_id, environment_id
@@ -49,8 +48,8 @@ class WatchServicesTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
 
         try:
             self.walrus_client.watch_services(project_id, environment_id)
@@ -69,8 +68,8 @@ class InformServiceReadyTool(BaseTool):
     walrus_client: WalrusClient
 
     def watch_service_ready(self, input: str):
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         start_time = time.time()
         timeout = 600
         while True:
@@ -101,7 +100,7 @@ class ListServicesInAllEnvironmentsTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        project_id = config.CONFIG.context.project_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
         try:
             services = self.walrus_client.list_services_in_all_environments(
                 project_id
@@ -123,8 +122,8 @@ class GetServicesTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, query: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             service = self.walrus_client.get_service_by_name(
                 project_id, environment_id, query
@@ -152,8 +151,8 @@ class CreateServiceTool(RequireApprovalTool):
         except Exception as e:
             raise e
 
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             self.walrus_client.create_service(
                 project_id, environment_id, service
@@ -176,8 +175,8 @@ class UpdateServiceTool(RequireApprovalTool):
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             self.walrus_client.update_service(project_id, environment_id, text)
         except Exception as e:
@@ -200,8 +199,8 @@ class DeleteServicesTool(RequireApprovalTool):
             raise e
 
         ids = [service["id"] for service in services if "id" in service]
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             self.walrus_client.delete_services(project_id, environment_id, ids)
         except Exception as e:
@@ -222,8 +221,8 @@ class GetServiceAccessEndpointsTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             endpoints = self.walrus_client.get_service_access_endpoints(
                 project_id, environment_id, text
@@ -247,8 +246,8 @@ class ListServiceResourcesTool(BaseTool):
     walrus_client: WalrusClient
 
     def _run(self, text: str) -> str:
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             resources = self.walrus_client.list_service_resources(
                 project_id, environment_id, text
@@ -273,7 +272,7 @@ class GetServiceDependencyGraphTool(BaseTool):
 
     def _run(self, text: str) -> str:
         data = {
-            "project_id": config.CONFIG.context.project_id,
+            "project_id": walrus_context.GLOBAL_CONTEXT.project_id,
             "service_id": text,
         }
         return f"```service_resource_graph\n{data}\n```"
@@ -303,8 +302,8 @@ class GetServiceResourceLogsTool(BaseTool):
         key = input.get("key")
         line_number = input.get("line_number", 100)
 
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             log = self.walrus_client.get_service_resource_logs(
                 project_id,
@@ -345,8 +344,8 @@ class GetServiceResourceLogsReturnDirectTool(BaseTool):
         key = input.get("key")
         line_number = input.get("line_number", 100)
 
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         try:
             log = self.walrus_client.get_service_resource_logs(
                 project_id,
@@ -386,8 +385,8 @@ class ConstructServiceToCreateTool(BaseTool):
         query = data.get("user_query")
         template_name = data.get("related_template_name")
 
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         existing_services = self.walrus_client.list_services(
             project_id, environment_id
         )
@@ -399,7 +398,7 @@ class ConstructServiceToCreateTool(BaseTool):
             template=CONSTRUCT_SERVICE_TO_CREATE_PROMPT,
             input_variables=["query"],
             partial_variables={
-                "context": json.dumps(config.CONFIG.context.__dict__),
+                "context": json.dumps(walrus_context.GLOBAL_CONTEXT.__dict__),
                 "existing_services": json.dumps(existing_services),
                 "related_template": json.dumps(related_template),
             },
@@ -433,8 +432,8 @@ class ConstructServiceToUpdateTool(BaseTool):
         service_name = data.get("service_name")
         template_name = data.get("related_template_name")
 
-        project_id = config.CONFIG.context.project_id
-        environment_id = config.CONFIG.context.environment_id
+        project_id = walrus_context.GLOBAL_CONTEXT.project_id
+        environment_id = walrus_context.GLOBAL_CONTEXT.environment_id
         related_template = self.walrus_client.get_template_version(
             template_name
         )
@@ -448,7 +447,7 @@ class ConstructServiceToUpdateTool(BaseTool):
             template=CONSTRUCT_SERVICE_TO_UPDATE_PROMPT,
             input_variables=["query"],
             partial_variables={
-                "context": json.dumps(config.CONFIG.context.__dict__),
+                "context": json.dumps(walrus_context.GLOBAL_CONTEXT.__dict__),
                 "current_service": json.dumps(current_service),
                 "related_template": json.dumps(related_template),
             },

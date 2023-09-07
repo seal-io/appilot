@@ -40,7 +40,7 @@ Do you approve the above action? """,
 
 
 def init_system_messages(llm: BaseLanguageModel):
-    language = config.CONFIG.natural_language
+    language = config.APPILOT_CONFIG.natural_language
     if language.lower() in ("en", "english"):
         return
 
