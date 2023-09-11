@@ -1,14 +1,6 @@
 from typing import Any, Dict, Optional
 
-from config import config
-from walrus.toolkit import WalrusToolKit
-from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
-from agent.prompt import (
-    AGENT_PROMPT_PREFIX,
-    FORMAT_INSTRUCTIONS_TEMPLATE,
-)
-from tools.human.tool import HumanTool
-
+from langchain.tools import BaseTool
 from langchain.agents.agent import AgentExecutor
 from langchain.agents.conversational.base import ConversationalAgent
 from langchain.callbacks.base import BaseCallbackManager
@@ -16,10 +8,20 @@ from langchain.chains.llm import LLMChain
 from langchain.memory import ReadOnlySharedMemory
 from langchain.schema.language_model import BaseLanguageModel
 
+from config import config
+from tools.human.tool import HumanTool
+from tools.reasoning.tool import ShowReasoningTool, HideReasoningTool
+from agent.output_parser import OutputParser
+from agent.prompt import (
+    AGENT_PROMPT_PREFIX,
+    FORMAT_INSTRUCTIONS_TEMPLATE,
+)
+
 
 def create_agent(
     llm: BaseLanguageModel,
     shared_memory: Optional[ReadOnlySharedMemory] = None,
+    tools: list[BaseTool] = [],
     callback_manager: Optional[BaseCallbackManager] = None,
     verbose: bool = True,
     agent_executor_kwargs: Optional[Dict[str, Any]] = None,
@@ -27,14 +29,13 @@ def create_agent(
 ) -> AgentExecutor:
     """Instantiate planner for a given task."""
 
-    tools = [
+    system_tools = [
         HumanTool(),
         ShowReasoningTool(),
         HideReasoningTool(),
     ]
 
-    walrus_toolkit = WalrusToolKit(llm=llm)
-    tools.extend(walrus_toolkit.get_tools())
+    tools.extend(system_tools)
 
     format_instructions = FORMAT_INSTRUCTIONS_TEMPLATE.format(
         natural_language=config.APPILOT_CONFIG.natural_language
@@ -49,6 +50,7 @@ def create_agent(
         llm_chain=LLMChain(
             llm=llm, prompt=prompt, verbose=config.APPILOT_CONFIG.verbose
         ),
+        output_parser=OutputParser(),
         allowed_tools=[tool.name for tool in tools],
         **kwargs,
     )

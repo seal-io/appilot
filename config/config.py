@@ -9,6 +9,7 @@ class Config(BaseModel):
     openai_api_key: str
     openai_api_base: str
     natural_language: str
+    toolkits: list[str]
     show_reasoning: bool
     verbose: bool
 
@@ -21,6 +22,7 @@ def init():
     openai_api_base = utils.get_env("OPENAI_API_BASE")
     openai_api_key = utils.get_env("OPENAI_API_KEY")
     natural_language = utils.get_env("NATURAL_LANGUAGE", "English")
+    toolkits = utils.get_env_list("TOOLKITS")
     show_reasoning = utils.get_env_bool("SHOW_REASONING", True)
     verbose = utils.get_env_bool("VERBOSE", False)
 
@@ -35,6 +37,7 @@ def init():
         openai_api_base=openai_api_base,
         openai_api_key=openai_api_key,
         natural_language=natural_language,
+        toolkits=toolkits,
         show_reasoning=show_reasoning,
         verbose=verbose,
     )

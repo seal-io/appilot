@@ -26,6 +26,7 @@ system_messages = {
     "show_graph_message": "The dependency graph is shown to you.",
     "inform_ready_start": "Start watching. Will inform when it's ready.",
     "service_ready_message": "Service {} is Ready.",
+    "enable_no_toolkit": "No toolkit available. Please enable at least one toolkit.",
     "ask_approval": """
 The following action requires approval:
 

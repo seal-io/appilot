@@ -22,6 +22,13 @@ def get_env(key: str, default: str = "") -> str:
     return env.strip()
 
 
+def get_env_list(key: str, default: [] = []) -> list[str]:
+    env = os.getenv(key)
+    if env is None:
+        return default
+    return [item.strip() for item in env.split(",")]
+
+
 def get_env_bool(key: str, default: bool = False) -> bool:
     env = os.getenv(key)
     if env is None:

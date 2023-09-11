@@ -1,15 +1,19 @@
+import sys
 from typing import Any
 import readline
+
+
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+import colorama
 
 from callbacks import handlers
 from config import config
 from i18n import text
 from utils import utils
 from agent.agent import create_agent
-
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-import colorama
+from walrus.toolkit import WalrusToolKit
+from k8s.toolkit import KubernetesToolKit
 
 last_error = None
 
@@ -28,8 +32,22 @@ def setup_agent() -> Any:
 
     memory = ConversationBufferMemory(memory_key="chat_history")
 
+    tools = []
+    if "kubernetes" in config.APPILOT_CONFIG.toolkits:
+        kubernetes_toolkit = KubernetesToolKit(llm=llm)
+        tools.extend(kubernetes_toolkit.get_tools())
+    elif "walrus" in config.APPILOT_CONFIG.toolkits:
+        walrus_toolkit = WalrusToolKit(llm=llm)
+        tools.extend(walrus_toolkit.get_tools())
+    else:
+        print(text.get("enable_no_toolkit"))
+        sys.exit(1)
+
     return create_agent(
-        llm, shared_memory=memory, verbose=config.APPILOT_CONFIG.verbose
+        llm,
+        shared_memory=memory,
+        tools=tools,
+        verbose=config.APPILOT_CONFIG.verbose,
     )
 
 
