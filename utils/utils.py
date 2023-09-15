@@ -14,6 +14,8 @@ console = Console()
 
 inform_sent = False
 
+raw_format_prefix = "[raw]"
+
 
 def get_env(key: str, default: str = "") -> str:
     env = os.getenv(key)
@@ -64,7 +66,10 @@ def is_inform_sent():
 
 def print_ai_response(message):
     print(text.get("response_prefix"), end="")
-    console.print(Markdown(message))
+    if message.startswith(raw_format_prefix):
+        print(message[len(raw_format_prefix) :])
+    else:
+        console.print(Markdown(message))
 
 
 def print_rejected_message():

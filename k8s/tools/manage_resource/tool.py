@@ -12,6 +12,7 @@ from tools.base.tools import RequireApprovalTool
 from kubernetes import config, dynamic, client
 from kubernetes.client import api_client
 from k8s import context
+from utils import utils
 
 
 class ListResourcesTool(BaseTool):
@@ -21,7 +22,8 @@ class ListResourcesTool(BaseTool):
     description = (
         "List kubernetes resources."
         'Input should be a json string with two keys: "resource_kind" and "namespace".'
-        "If namespace is --all, it lists in all namespaces."
+        '"namespace" is optional, set it to empty string if user does not specify.'
+        "If namespace is --all, lists in all namespaces."
     )
 
     def _run(self, text: str) -> str:
@@ -48,7 +50,8 @@ class ListResourcesTool(BaseTool):
         except Exception as e:
             return f"Error: {e}"
 
-        return output
+        # Print raw output without markdown rendering
+        return f"{utils.raw_format_prefix}\n{output}"
 
 
 class DeleteResourceTool(RequireApprovalTool):
@@ -120,6 +123,40 @@ class GetResourceDetailTool(BaseTool):
             return f"Error getting resource detail: {e}"
 
         return json.dumps(resource.to_dict())
+
+
+class GetPodLogsTool(BaseTool):
+    """Tool to get logs of a pod."""
+
+    name = "get_kubernetes_pod_logs"
+    description = (
+        "Get logs of a pod. "
+        'Input should be a json string with four keys: "name", "namespace", "container_name" and "line_number".'
+        '"container_name" is optional. Set it to the name of the container to get logs from.'
+        '"line_number" is int defaulting to 50. Set it to the number of lines of logs to return.'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        name = input.get("name")
+        namespace = input.get("namespace")
+        container_name = input.get("container_name", "")
+        line_number = input.get("line_number", 50)
+
+        if namespace == "":
+            namespace = "default"
+
+        v1 = client.CoreV1Api()
+
+        pod_log = v1.read_namespaced_pod_log(
+            name=name,
+            namespace=namespace,
+            container=container_name,
+            tail_lines=line_number,
+        )
+
+        return f"```\n{pod_log}\n```"
 
 
 class ConstructResourceTool(BaseTool):

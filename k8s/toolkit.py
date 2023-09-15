@@ -14,6 +14,7 @@ from k8s.tools.manage_resource.tool import (
     ApplyResourcesTool,
     ConstructResourceTool,
     DeleteResourceTool,
+    GetPodLogsTool,
     GetResourceDetailTool,
     ListResourcesTool,
 )
@@ -35,6 +36,7 @@ class KubernetesToolKit:
         tools = [
             ListResourcesTool(return_direct=True),
             GetResourceDetailTool(),
+            GetPodLogsTool(return_direct=True),
             DeleteResourceTool(),
             ConstructResourceTool(llm=llm),
             ApplyResourcesTool(),
