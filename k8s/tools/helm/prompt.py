@@ -16,20 +16,21 @@ User query: {query}
 CONSTRUCTED RESOURCES: 
 """
 
-CONSTRUCT_HELM_OVERRIDED_VALUES = """
-You will be provided the default values of a helm chart, and a user query describing a deployment task.
+EXTRACT_KEYWORD_PROMPT = """
+You will be provided a user query describing a deployment task. You need to extract the keyword used to seach available helm charts for the deployment.
 
-Output overrided values(in yaml) for the helm installation to satisfy the user query.
+Example:
+User query: deploy a HA mysql.
 
-USER QUERY:
-{query}
+keyword: 
+mysql
 
-DEFAULT VALUES:
-{default_values}
+---
 
-OVERRIDED VALUES:
+User query: {query}
+
+keyword:
 """
-
 
 CONSTRUCT_RESOURCES_TO_UPDATE_PROMPT = """
 You are a planner that constructs the expected service object given a user query describing an upgrade task.

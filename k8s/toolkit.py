@@ -2,6 +2,14 @@ from langchain.schema.language_model import BaseLanguageModel
 from kubernetes import config
 
 from k8s import context
+from k8s.tools.helm.tool import (
+    DeleteApplicationTool,
+    DeployApplicationTool,
+    GetApplicationAccessEndpointsTool,
+    GetApplicationDetailTool,
+    ListApplicationsTool,
+    SearchChartTool,
+)
 from k8s.tools.manage_resource.tool import (
     ApplyResourcesTool,
     ConstructResourceTool,
@@ -9,6 +17,7 @@ from k8s.tools.manage_resource.tool import (
     GetResourceDetailTool,
     ListResourcesTool,
 )
+from walrus.tools.general.tools import BrowseURLTool
 
 
 class KubernetesToolKit:
@@ -24,10 +33,17 @@ class KubernetesToolKit:
     def get_tools(self):
         llm = self.llm
         tools = [
-            ListResourcesTool(),
+            ListResourcesTool(return_direct=True),
             GetResourceDetailTool(),
             DeleteResourceTool(),
             ConstructResourceTool(llm=llm),
             ApplyResourcesTool(),
+            SearchChartTool(llm=llm),
+            DeployApplicationTool(),
+            ListApplicationsTool(),
+            GetApplicationDetailTool(),
+            GetApplicationAccessEndpointsTool(),
+            BrowseURLTool(),
+            DeleteApplicationTool(),
         ]
         return tools

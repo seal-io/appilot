@@ -1,4 +1,5 @@
 import json
+import subprocess
 from langchain import LLMChain, PromptTemplate
 from langchain.agents.tools import BaseTool
 import yaml
@@ -20,73 +21,34 @@ class ListResourcesTool(BaseTool):
     description = (
         "List kubernetes resources."
         'Input should be a json string with two keys: "resource_kind" and "namespace".'
-        "If namespace is empty, it lists in all namespaces."
+        "If namespace is --all, it lists in all namespaces."
     )
 
     def _run(self, text: str) -> str:
         input = json.loads(text)
 
-        dyn_client = dynamic.DynamicClient(
-            api_client.ApiClient(configuration=config.load_kube_config())
-        )
         resource_kind = str(input.get("resource_kind")).lower()
         namespace = str(input.get("namespace")).lower()
 
-        gvk = context.search_api_resource(resource_kind)
+        # Use kubectl directly. Raw API output can easily exceed the LLM rate limit.
+        kubectl_get_command = f"kubectl get {resource_kind}"
 
-        resources = dyn_client.resources.get(
-            api_version=gvk.groupVersion,
-            kind=gvk.kind,
-        )
-        resource_list = resources.get(namespace=namespace)
-        items = resource_list.to_dict().get("items")
-        for resource in items:
-            try:
-                # make list prompt short.
-                del resource["metadata"]["managedFields"]
-                del resource["metadata"]["resourceVersion"]
-                del resource["metadata"]["uid"]
-                del resource["metadata"]["generation"]
-                del resource["spec"]
-            except KeyError:
-                pass
-        return json.dumps(items)
+        if namespace == "--all":
+            kubectl_get_command += " --all-namespaces"
+        elif namespace:
+            kubectl_get_command += f" -n {namespace}"
 
-
-class GetResourceDetailTool(BaseTool):
-    """Tool to get detail of a kubernetes resource."""
-
-    name = "get_kubernetes_resource_detail"
-    description = (
-        "Get detail of a kubernetes resource. "
-        'Input should be a json string with three keys: "resource_kind", "resource_name" and "namespace".'
-    )
-
-    def _run(self, text: str) -> str:
-        input = json.loads(text)
-
-        dyn_client = dynamic.DynamicClient(
-            api_client.ApiClient(configuration=config.load_kube_config())
-        )
-        resource_kind = input.get("resource_kind")
-        resource_name = input.get("resource_name")
-        namespace = input.get("namespace", "default")
-        gvk = context.search_api_resource(resource_kind)
-        resources = dyn_client.resources.get(
-            api_version=gvk.groupVersion,
-            kind=gvk.kind,
-        )
-
-        resource = resources.get(name=resource_name, namespace=namespace)
         try:
-            # make prompt short.
-            del resource["metadata"]["managedFields"]
-            del resource["metadata"]["resourceVersion"]
-            del resource["metadata"]["uid"]
-            del resource["metadata"]["generation"]
-        except KeyError:
-            pass
-        return json.dumps(resource.to_dict())
+            output = subprocess.check_output(
+                kubectl_get_command, shell=True, universal_newlines=True
+            )
+
+        except subprocess.CalledProcessError as e:
+            return f"kubectl get failed: {e}"
+        except Exception as e:
+            return f"Error: {e}"
+
+        return output
 
 
 class DeleteResourceTool(RequireApprovalTool):
@@ -113,9 +75,51 @@ class DeleteResourceTool(RequireApprovalTool):
             kind=gvk.kind,
         )
 
-        resources.delete(name=resource_name, namespace=namespace)
+        try:
+            resources.delete(name=resource_name, namespace=namespace)
+        except Exception as e:
+            return f"Error deleting resource: {e}"
 
         return "Resource is being deleted."
+
+
+class GetResourceDetailTool(BaseTool):
+    """Tool to get detail of a kubernetes resource."""
+
+    name = "get_kubernetes_resource_detail"
+    description = (
+        "Get detail of a kubernetes resource. "
+        'Input should be a json string with three keys: "resource_kind", "resource_name" and "namespace".'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        dyn_client = dynamic.DynamicClient(
+            api_client.ApiClient(configuration=config.load_kube_config())
+        )
+        resource_kind = input.get("resource_kind")
+        resource_name = input.get("resource_name")
+        namespace = input.get("namespace", "default")
+        gvk = context.search_api_resource(resource_kind)
+        resources = dyn_client.resources.get(
+            api_version=gvk.groupVersion,
+            kind=gvk.kind,
+        )
+
+        try:
+            resource = resources.get(name=resource_name, namespace=namespace)
+            # make prompt short.
+            del resource["metadata"]["managedFields"]
+            del resource["metadata"]["resourceVersion"]
+            del resource["metadata"]["uid"]
+            del resource["metadata"]["generation"]
+        except KeyError:
+            pass
+        except Exception as e:
+            return f"Error getting resource detail: {e}"
+
+        return json.dumps(resource.to_dict())
 
 
 class ConstructResourceTool(BaseTool):
@@ -157,8 +161,11 @@ class ApplyResourcesTool(RequireApprovalTool):
         # remove triple backticks of the yaml text
         filtered_lines = [line for line in lines if not line.startswith("```")]
         filtered_text = "\n".join(filtered_lines)
-        yaml_documents = yaml.safe_load_all(filtered_text)
-        apply_or_update_yaml(yaml_documents)
+        try:
+            yaml_documents = yaml.safe_load_all(filtered_text)
+            apply_or_update_yaml(yaml_documents)
+        except Exception as e:
+            return f"Error applying/updating YAML manifest: {str(e)}"
 
         resources = []
         for yaml_manifest in yaml_documents:
