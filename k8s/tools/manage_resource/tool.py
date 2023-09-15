@@ -1,5 +1,6 @@
 import json
 import subprocess
+import click
 from langchain import LLMChain, PromptTemplate
 from langchain.agents.tools import BaseTool
 import yaml
@@ -13,6 +14,7 @@ from kubernetes import config, dynamic, client
 from kubernetes.client import api_client
 from k8s import context
 from utils import utils
+from i18n import text
 
 
 class ListResourcesTool(BaseTool):
@@ -157,6 +159,47 @@ class GetPodLogsTool(BaseTool):
         )
 
         return f"```\n{pod_log}\n```"
+
+
+class WatchResourcesTool(BaseTool):
+    """Tool to watch resources."""
+
+    name = "watch_resources"
+    description = (
+        "Watch resources changes in a namespace."
+        'Input should be a json string with two keys: "resource_kind" and "namespace".'
+    )
+
+    def _run(self, query: str) -> str:
+        input = json.loads(query)
+        resource_kind = str(input.get("resource_kind")).lower()
+        namespace = str(input.get("namespace")).lower()
+
+        kubectl_watch_command = f"kubectl get {resource_kind} -w"
+
+        if namespace != "":
+            kubectl_watch_command += f" -n {namespace}"
+
+        try:
+            click.echo(text.get("watch_service_note"))
+            process = subprocess.Popen(
+                kubectl_watch_command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            for line in process.stdout:
+                print(line, end="")
+
+            process.wait()
+
+        except KeyboardInterrupt:
+            # Ctrl+C detected. Stopping the request.
+            print("Terminated by user")
+
+        return text.get("watch_service_ending")
 
 
 class ConstructResourceTool(BaseTool):

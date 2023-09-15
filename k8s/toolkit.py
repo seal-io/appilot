@@ -17,6 +17,7 @@ from k8s.tools.manage_resource.tool import (
     GetPodLogsTool,
     GetResourceDetailTool,
     ListResourcesTool,
+    WatchResourcesTool,
 )
 from walrus.tools.general.tools import BrowseURLTool
 
@@ -37,6 +38,7 @@ class KubernetesToolKit:
             ListResourcesTool(return_direct=True),
             GetResourceDetailTool(),
             GetPodLogsTool(return_direct=True),
+            WatchResourcesTool(return_direct=True),
             DeleteResourceTool(),
             ConstructResourceTool(llm=llm),
             ApplyResourcesTool(),
