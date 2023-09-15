@@ -65,6 +65,8 @@ def run():
         elif user_query == "appilot_log":
             print_last_error()
             continue
+        elif user_query.startswith("#"):
+            continue
         elif not user_query.strip():
             continue
 
