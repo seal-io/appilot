@@ -1,6 +1,6 @@
 # Appilot
 
-Appilot`[ə'paɪlət]` stands for application-pilot.
+Appilot['æpaɪlət] stands for application-pilot.
 It is an experimental project that helps you operate applications using GPT-like LLM.
 
 ## Demo
