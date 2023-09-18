@@ -261,25 +261,23 @@ class ApplyResourcesTool(RequireApprovalTool):
 
 def apply_or_update_yaml(yaml_documents):
     for yaml_manifest in yaml_documents:
-        api_group = yaml_manifest["apiVersion"].split("/")[0]
-        api_version = yaml_manifest["apiVersion"].split("/")[1]
+        api_version = yaml_manifest["apiVersion"]
         kind = yaml_manifest["kind"]
 
         config.load_kube_config()
         dynamic_client = dynamic.DynamicClient(client.api_client.ApiClient())
         resource = dynamic_client.resources.get(
-            api_version=f"{api_group}/{api_version}", kind=kind
+            api_version=api_version, kind=kind
         )
 
         namespace = yaml_manifest.get("metadata", {}).get(
             "namespace", "default"
         )
+        name = yaml_manifest.get("metadata", {}).get("name", "")
 
         resource_exists = False
         try:
-            resource.get(
-                namespace=namespace, name=yaml_manifest["metadata"]["name"]
-            )
+            resource.get(namespace=namespace, name=name)
             resource_exists = True
         except Exception as e:
             pass
@@ -289,7 +287,7 @@ def apply_or_update_yaml(yaml_documents):
             if resource_exists:
                 resource.patch(
                     namespace=namespace,
-                    name=yaml_manifest["metadata"]["name"],
+                    name=name,
                     body=yaml_manifest,
                 )
             else:
