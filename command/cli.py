@@ -32,11 +32,15 @@ def setup_agent() -> Any:
 
     memory = ConversationBufferMemory(memory_key="chat_history")
 
+    enabled_toolkits = [
+        toolkit.lower() for toolkit in config.APPILOT_CONFIG.toolkits
+    ]
+
     tools = []
-    if "kubernetes" in config.APPILOT_CONFIG.toolkits:
+    if "kubernetes" in enabled_toolkits:
         kubernetes_toolkit = KubernetesToolKit(llm=llm)
         tools.extend(kubernetes_toolkit.get_tools())
-    elif "walrus" in config.APPILOT_CONFIG.toolkits:
+    elif "walrus" in enabled_toolkits:
         walrus_toolkit = WalrusToolKit(llm=llm)
         tools.extend(walrus_toolkit.get_tools())
     else:
