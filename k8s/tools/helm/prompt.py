@@ -1,66 +1,30 @@
-CONSTRUCT_RESOURCES_TO_CREATE_PROMPT = """
-You are a planner that constructs kubernetes resources given a user query describing a deployment task.
+CONSTRUCT_HELM_OVERRIDED_VALUES = """
+You will be provided the default values of a helm chart, and a user query describing a deployment task.
 
-You should:
-1) evaluate whether kubernetes resources can be constructed according to the user query. If no, say why.
-2) if yes, output in the following format:
+Output overrided values(in yaml) for the helm installation to satisfy the user query.
 
-CONSTRUCTED RESOURCES: 
-<KUBERNETES_RESOURCES_IN_YAML>
+USER QUERY:
+{query}
 
-Strictly follow the above output format, do not add extra explanation or words.
-The output will be applied to a kubernetes cluster for creation.
+DEFAULT VALUES:
+{default_values}
 
-User query: {query}
-
-CONSTRUCTED RESOURCES: 
+OVERRIDED VALUES:
 """
 
-EXTRACT_KEYWORD_PROMPT = """
-You will be provided a user query describing a deployment task. You need to extract the keyword used to seach available helm charts for the deployment.
+CONSTRUCT_HELM_UPGRADE_VALUES = """
+You will be provided the default values of a helm chart, previous values of a helm release, and a user query describing an upgrade task.
 
-Example:
-User query: deploy a HA mysql.
+Output values(in yaml) used for the helm upgrade to satisfy the user query. Keep the previous values in the output as much as possible if they are not changed in the user query.
 
-keyword: 
-mysql
+USER QUERY:
+{query}
 
----
+DEFAULT VALUES:
+{default_values}
 
-User query: {query}
+PREVIOUS VALUES:
+{previous_values}
 
-keyword:
-"""
-
-CONSTRUCT_RESOURCES_TO_UPDATE_PROMPT = """
-You are a planner that constructs the expected service object given a user query describing an upgrade task.
-For your reference, you will be provided the service about to upgrade and related template version if there's any in the environment. Choose a template and fill in the input variables for the service.
-
-You should:
-1) evaluate whether the service object can be constructed according to the user query. If no, say why.
-2) if yes, output in the following format:
-
-CONSTRUCTED SERVICE: <SERVICE_OBJECT_IN_ONE_LINE_JSON>
-
-Strictly follow the above output format, do not add extra explanation or words.
-Service id is required.
-Environment info is required.
-Service status is not needed.
-The output will be used in the update API call of the service.
-
-Example:
-
-CONSTRUCTED SERVICE: {{"name":"example","template":{{"name":"webservice","version":"0.0.4"}},"environment":{{"id":"1234567"}},"attributes":{{"image":"nginx","ports":[80],"request_cpu":"0.1","request_memory":"128Mi"}}}}
-
-----
-
-Context: {context}
-User query: {query}
-
-CURRENT SERVICE:
-{current_service}
-
-RELATED TEMPLATE:
-{related_template}
-
+VALUES FOR UPGRADE:
 """

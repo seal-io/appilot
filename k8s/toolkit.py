@@ -5,10 +5,12 @@ from k8s import context
 from k8s.tools.helm.tool import (
     DeleteApplicationTool,
     DeployApplicationTool,
+    GenerateUpgradeApplicationValuesTool,
     GetApplicationAccessEndpointsTool,
     GetApplicationDetailTool,
     ListApplicationsTool,
     SearchChartTool,
+    UpgradeApplicationTool,
 )
 from k8s.tools.manage_resource.tool import (
     ApplyResourcesTool,
@@ -44,6 +46,8 @@ class KubernetesToolKit:
             ApplyResourcesTool(),
             SearchChartTool(llm=llm),
             DeployApplicationTool(),
+            GenerateUpgradeApplicationValuesTool(llm=llm),
+            UpgradeApplicationTool(),
             ListApplicationsTool(),
             GetApplicationDetailTool(),
             GetApplicationAccessEndpointsTool(),

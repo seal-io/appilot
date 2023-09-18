@@ -9,15 +9,13 @@ import requests
 import yaml
 from config import config
 from langchain.schema.language_model import BaseLanguageModel
-from k8s.tools.helm.prompt import EXTRACT_KEYWORD_PROMPT
-from k8s.tools.manage_resource.prompt import (
+from k8s.tools.helm.prompt import (
     CONSTRUCT_HELM_OVERRIDED_VALUES,
-    CONSTRUCT_RESOURCES_TO_CREATE_PROMPT,
+    CONSTRUCT_HELM_UPGRADE_VALUES,
 )
 from tools.base.tools import RequireApprovalTool
 from kubernetes import config, dynamic, client
 from kubernetes.client import api_client
-from k8s import context
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +26,41 @@ def remove_empty_lines_and_comments(input_string):
     cleaned_string = cleaned_string.strip()
 
     return cleaned_string
+
+
+def get_chart_default_values(chart_url: str):
+    """Get default values(in yaml) of a helm chart."""
+    helm_show_values_command = f"helm show values {chart_url}"
+
+    try:
+        output = subprocess.check_output(
+            helm_show_values_command, shell=True, universal_newlines=True
+        )
+
+        return remove_empty_lines_and_comments(output)
+    except subprocess.CalledProcessError as e:
+        return f"Helm show values failed: {e}"
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def get_helm_release_values(namespace: str, name: str):
+    """Get values of a helm release."""
+    helm_get_values_command = f"helm get values {name} -o yaml"
+
+    if namespace:
+        helm_get_values_command += f" --namespace {namespace}"
+
+    try:
+        output = subprocess.check_output(
+            helm_get_values_command, shell=True, universal_newlines=True
+        )
+
+        return output
+    except subprocess.CalledProcessError as e:
+        return f"Helm get values failed: {e}"
+    except Exception as e:
+        return f"Error: {e}"
 
 
 def searchChart(keyword: str):
@@ -58,20 +91,12 @@ def searchChart(keyword: str):
         f"https://artifacthub.io/api/v1/packages/helm/{repository_name}/{chart_name}/{version}",
     )
     chart_raw = response.json()
-    package_id = chart_raw.get("package_id")
-    version = chart_raw.get("version")
-
-    response = requests.get(
-        f"https://artifacthub.io/api/v1/packages/{package_id}/{version}/values",
-    )
-    default_values = remove_empty_lines_and_comments(response.text)
 
     chart = {}
     chart["name"] = chart_raw.get("name")
     chart["version"] = chart_raw.get("version")
     chart["description"] = chart_raw.get("description")
     chart["content_url"] = chart_raw.get("content_url")
-    chart["default_values"] = default_values
     return chart
 
 
@@ -94,14 +119,15 @@ class SearchChartTool(BaseTool):
         keyword = input.get("keyword")
         chart = searchChart(keyword)
 
+        default_values = get_chart_default_values(chart.get("content_url"))
+
         prompt = PromptTemplate(
             template=CONSTRUCT_HELM_OVERRIDED_VALUES,
             input_variables=["query"],
-            partial_variables={"default_values": chart.get("default_values")},
+            partial_variables={"default_values": default_values},
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
         overrided_values = chain.run(query).strip()
-        del chart["default_values"]
         chart["overrided_values"] = yaml.safe_load(overrided_values)
         return json.dumps(chart)
 
@@ -129,7 +155,11 @@ class DeployApplicationTool(RequireApprovalTool):
         if namespace != "":
             helm_install_command += f" --namespace {namespace}"
 
-        if input.get("values"):
+        values = input.get("values")
+        if values:
+            # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
+            values["metadata_chart_url"] = chart_url
+
             output_directory = "/tmp/appilot"
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
@@ -147,6 +177,111 @@ class DeployApplicationTool(RequireApprovalTool):
             return f"application {name} is deployed."
         except subprocess.CalledProcessError as e:
             return f"Helm install failed: {e}"
+        except Exception as e:
+            return f"Error: {e}"
+
+
+class GenerateUpgradeApplicationValuesTool(BaseTool):
+    """Tool to generate values for upgrading an application."""
+
+    name = "generate_upgrade_application_values"
+    description = (
+        "Generate values for upgrading an application."
+        'Input should be a json string with three keys, "namespace", "name", "user_query".'
+        '"namespace" is the namespace of the application.'
+        '"name" is the name of the application.'
+        '"user_query" is the description of the deployment task.'
+        "Output overrided values for the helm upgrade."
+    )
+    llm: BaseLanguageModel
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+        namespace = input.get("namespace")
+        name = input.get("name")
+        query = input.get("user_query")
+
+        helm_values_command = f"helm get values {name}"
+
+        if namespace != "":
+            helm_values_command += f" --namespace {namespace}"
+
+        previous_values = get_helm_release_values(namespace, name)
+
+        chart_url = yaml.safe_load(previous_values).get("metadata_chart_url")
+        if not chart_url:
+            return "Missing chart_url metadata in previous release"
+
+        default_values = get_chart_default_values(chart_url)
+
+        prompt = PromptTemplate(
+            template=CONSTRUCT_HELM_UPGRADE_VALUES,
+            input_variables=["query"],
+            partial_variables={
+                "default_values": default_values,
+                "previous_values": previous_values,
+            },
+        )
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        overrided_values_yaml = chain.run(query).strip()
+
+        overrided_values = yaml.safe_load(overrided_values_yaml)
+        if "metadata_chart_url" in overrided_values:
+            del overrided_values["metadata_chart_url"]
+
+        return json.dumps(overrided_values)
+
+
+class UpgradeApplicationTool(RequireApprovalTool):
+    """Tool to upgrade an application."""
+
+    name = "upgrade_application"
+    description = (
+        "Upgrade an application."
+        'Input should be a json string with three keys, "namespace", "name", "values".'
+        '"namespace" is the namespace to deploy the application.'
+        '"name" is the name of the application, generate a reasonable one if not specified.'
+        '"values" is overrided values for helm upgrade to satisfy user query.'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+        namespace = input.get("namespace")
+        name = input.get("name")
+        values = input.get("values")
+
+        previous_values = get_helm_release_values(namespace, name)
+
+        chart_url = yaml.safe_load(previous_values).get("metadata_chart_url")
+        if not chart_url:
+            return "Missing chart_url metadata in previous release"
+
+        helm_upgrade_command = f"helm upgrade {name} {chart_url}"
+
+        if namespace != "":
+            helm_upgrade_command += f" --namespace {namespace}"
+
+        if values:
+            # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
+            values["metadata_chart_url"] = chart_url
+
+            output_directory = "/tmp/appilot"
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+            file_path = f"{output_directory}/values.yaml"
+            with open(file_path, "w") as file:
+                yaml.dump(values, file)
+            helm_upgrade_command += f" -f {file_path}"
+
+        try:
+            output = subprocess.check_output(
+                helm_upgrade_command, shell=True, universal_newlines=True
+            )
+
+            logger.debug(f"helm upgrade output: {output}")
+            return f"application {name} is upgraded."
+        except subprocess.CalledProcessError as e:
+            return f"Helm upgrade failed: {e}"
         except Exception as e:
             return f"Error: {e}"
 
@@ -358,18 +493,6 @@ class ListApplicationsTool(BaseTool):
                 helm_release.get("name"), helm_release.get("namespace")
             )
         return json.dumps(helm_releases)
-
-
-class UpgradeApplicationTool(BaseTool):
-    """Tool to upgrade an application."""
-
-    pass
-
-
-class RollbackApplicationTool(BaseTool):
-    """Tool to rollback an application to a previous version."""
-
-    pass
 
 
 class GetApplicationResourcesTool(BaseTool):
