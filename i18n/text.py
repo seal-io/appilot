@@ -14,7 +14,7 @@ RESULT:
 
 system_messages = {
     "welcome": "Appilot: What can I help?",
-    "ai_reasoning": "Appilot reasoning:",
+    "ai_reasoning": "Appilot reasoning: ",
     "response_prefix": "Appilot: ",
     "inform_prefix": "Appilot[inform]: ",
     "error_occur_message": "An internal error occurred. Enter 'appilot_log' if you want to see the details.",
