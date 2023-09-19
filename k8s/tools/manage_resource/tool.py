@@ -6,6 +6,10 @@ from langchain.agents.tools import BaseTool
 import yaml
 from config import config
 from langchain.schema.language_model import BaseLanguageModel
+from k8s.tools.common.endpoint import (
+    get_ingress_endpoints,
+    get_service_endpoints,
+)
 from k8s.tools.manage_resource.prompt import (
     CONSTRUCT_RESOURCES_TO_CREATE_PROMPT,
 )
@@ -130,6 +134,74 @@ class GetResourceDetailTool(BaseTool):
             return f"Error getting resource detail: {e}"
 
         return json.dumps(resource)
+
+
+class GetServiceAccessEndpointsTool(BaseTool):
+    """Tool to get access endpoints of a kubernetes service."""
+
+    name = "get_kubernetes_service_access_endpoints"
+    description = (
+        "Get access endpoints of a kubernetes service. "
+        'Input should be a json string with two keys: "namespace" and "name".'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        name = input.get("name")
+        namespace = input.get("namespace")
+
+        if namespace == "":
+            namespace = "default"
+
+        try:
+            dynamic_client = dynamic.DynamicClient(
+                client.api_client.ApiClient()
+            )
+            resource = dynamic_client.resources.get(
+                api_version="v1", kind="Service"
+            )
+            service = resource.get(namespace=namespace, name=name)
+
+            endpoints = get_service_endpoints(service)
+        except Exception as e:
+            return f"Error getting service endpoints: {e}"
+
+        return json.dumps(endpoints)
+
+
+class GetIngressAccessEndpointsTool(BaseTool):
+    """Tool to get access endpoints of a kubernetes ingress."""
+
+    name = "get_kubernetes_ingress_access_endpoints"
+    description = (
+        "Get access endpoints of a kubernetes ingress. "
+        'Input should be a json string with two keys: "namespace" and "name".'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        name = input.get("name")
+        namespace = input.get("namespace")
+
+        if namespace == "":
+            namespace = "default"
+
+        try:
+            dynamic_client = dynamic.DynamicClient(
+                client.api_client.ApiClient()
+            )
+            resource = dynamic_client.resources.get(
+                api_version="networking.k8s.io/v1", kind="Ingress"
+            )
+            ingress = resource.get(namespace=namespace, name=name)
+
+            endpoints = get_ingress_endpoints(ingress)
+        except Exception as e:
+            return f"Error getting ingress endpoints: {e}"
+
+        return json.dumps(endpoints)
 
 
 class GetPodLogsTool(BaseTool):
