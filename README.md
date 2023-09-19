@@ -1,48 +1,56 @@
 # Appilot
 
 Appilot['æpaɪlət] stands for application-pilot.
-It is an experimental project that helps you operate applications using GPT-like LLM.
-
-## Demo
-
-```
-!!!TODO!!!
-- deploy nginx.
-- use helm to deploy an ELK stack.
-- deploy a llama2 instance on AWS.
-- upgrade and clean up a service.
-- clone an environment.
-- diagnose and resolve a service NotReady issue.
-```
+It is an experimental project that helps you operate applications using GPT-like LLMs.
 
 ## Feature
 
 - Application management: deploy, upgrade, rollback, etc.
 - Environment management: clone, view topology, etc.
-- Diagnose: find flaws and ask AI to fix.
-- Other operations: view logs, access terminal to debug, etc.
+- Diagnose: view logs, find flaws and provide fixes.
 - Safeguard: any action involving state changes requires human approval.
 - Hybrid infrastructure: works on kubernetes, VM, cloud, on-prem.
-- Multi language support: It's not limited to English. Operate with the natural language you prefer.
+- Multi language support: It's not restricted to a specific natural language. Choose the one you're comfortable with.
+- Pluggable backends: It supports multiple backends including Walrus and Kubernetes, and is extensible.
+
+## Demo
+
+[PLACE_HOLDER]
 
 ## Run
 
 **prerequistes:**
 
 - Get OpenAI API key with access to the gpt-4 model.
-- Install [Walrus](https://github.com/seal-io/walrus) and get the url and API key. Walrus is an open source software that can be run by a docker command. It serves as the engine for application management.
+- For [Walrus](https://github.com/seal-io/walrus) backend
+  - Install Walrus and get the url and API key. Walrus is an open source software that can be run by a docker command. It serves as the engine for application management.
+- For [Kubernetes](https://kubernetes.io) backend
+  - Install [kubectl](https://kubernetes.io/docs/tasks/tools/) and [helm](https://helm.sh/docs/intro/install/)
+  - Have a running Kubernetes cluster
 
 ### Run with Docker
 
 **Prerequisites:** `docker` installed.
 
-1. Fill in envfile by running the following command, then set variables in `.env` file.
+1. Get an envfile by running the following command.
 
 ```
 mv .env.example .env
 ```
 
-2. Run the following command:
+2. Configure the `.env` file.
+
+For Walrus backend,
+
+- Set `TOOLKITS=walrus`
+- Fill in `OPENAI_API_KEY`, `WALRUS_URL` and `WALRUS_API_KEY`
+
+For Kubernetes backend,
+
+- Set `TOOLKITS=kubernetes`
+- Fill in `OPENAI_API_KEY`
+
+3. Run the following command:
 
 ```
 docker run -it --env-file .env sealio/appilot:main
@@ -52,13 +60,25 @@ docker run -it --env-file .env sealio/appilot:main
 
 **Prerequisites:** `python3` and `make` installed.
 
-1. Fill in envfile by running the following command, then set variables in `.env` file.
+1. Get an envfile by running the following command.
 
 ```
 mv .env.example .env
 ```
 
-2. Run the following command to install. It will create a venv and install required dependencies.
+2. Configure the `.env` file.
+
+For Walrus backend,
+
+- Set `TOOLKITS=walrus`
+- Fill in `OPENAI_API_KEY`, `WALRUS_URL` and `WALRUS_API_KEY`
+
+For Kubernetes backend,
+
+- Set `TOOLKITS=kubernetes`
+- Fill in `OPENAI_API_KEY`
+
+3. Run the following command to install. It will create a venv and install required dependencies.
 
 ```
 make install
