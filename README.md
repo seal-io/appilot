@@ -20,9 +20,9 @@ Deploying llama-2 on AWS:
 https://github.com/seal-io/appilot/assets/5697937/0562fe29-8e97-42ba-bbf6-eaa5b5fefc41
 
 Other use cases:
-- [Operating native Kubernetes resources](https://github.com/seal-io/appilot/assets/5697937/e2cd0601-ad3c-4e2f-ba05-47d004bff771)
-- [Manage applications in Kubernetes using helm charts](https://github.com/seal-io/appilot/assets/5697937/9f048928-58c9-4e36-adc5-9c4e2e7a4d63)
 
+- [Manage applications in Kubernetes using helm charts](./examples/k8s_helm.md)
+- [Operating native Kubernetes resources](./examples/k8s_yaml.md)
 
 ## Run
 
