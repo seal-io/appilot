@@ -17,11 +17,13 @@ from k8s.tools.manage_resource.tool import (
     ConstructResourceForUpdateTool,
     ConstructResourceTool,
     DeleteResourceTool,
+    DescribePodTool,
     GetIngressAccessEndpointsTool,
     GetPodLogsTool,
     GetResourceDetailTool,
     GetResourceYamlTool,
     GetServiceAccessEndpointsTool,
+    ListResourcesForInfoTool,
     ListResourcesTool,
     WatchResourcesTool,
 )
@@ -42,11 +44,13 @@ class KubernetesToolKit:
         llm = self.llm
         tools = [
             ListResourcesTool(return_direct=True),
+            ListResourcesForInfoTool(),
             GetResourceDetailTool(),
             GetResourceYamlTool(return_direct=True),
             GetServiceAccessEndpointsTool(),
             GetIngressAccessEndpointsTool(),
-            GetPodLogsTool(return_direct=True),
+            GetPodLogsTool(),
+            DescribePodTool(),
             WatchResourcesTool(return_direct=True),
             DeleteResourceTool(),
             ConstructResourceTool(llm=llm),

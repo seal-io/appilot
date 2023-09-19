@@ -64,6 +64,18 @@ class ListResourcesTool(BaseTool):
         return f"{utils.raw_format_prefix}\n{output}"
 
 
+class ListResourcesForInfoTool(ListResourcesTool):
+    """Tool to list resources for info."""
+
+    name = "list_kubernetes_resources_for_info"
+    description = (
+        "List kubernetes resources to help find more info, instead of returning to the user."
+        'Input should be a json string with two keys: "resource_kind" and "namespace".'
+        '"namespace" is optional, set it to empty string if user does not specify.'
+        "If namespace is --all, lists in all namespaces."
+    )
+
+
 class DeleteResourceTool(RequireApprovalTool):
     """Tool to delete a kubernetes resource."""
 
@@ -257,6 +269,39 @@ class GetIngressAccessEndpointsTool(BaseTool):
         return json.dumps(endpoints)
 
 
+class DescribePodTool(BaseTool):
+    """Tool to describe a pod."""
+
+    name = "describe_pod"
+    description = (
+        "Show details of a pod including related events. "
+        'Input should be a json string with two keys: "name" and "namespace".'
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        name = input.get("name")
+        namespace = input.get("namespace")
+        if namespace == "":
+            namespace = "default"
+
+        kubectl_describe_command = (
+            f"kubectl describe pod {name} -n {namespace}"
+        )
+
+        try:
+            output = subprocess.check_output(
+                kubectl_describe_command, shell=True, universal_newlines=True
+            )
+        except subprocess.CalledProcessError as e:
+            return f"kubectl get failed: {e}"
+        except Exception as e:
+            return f"Error: {e}"
+
+        return output
+
+
 class GetPodLogsTool(BaseTool):
     """Tool to get logs of a pod."""
 
@@ -281,12 +326,15 @@ class GetPodLogsTool(BaseTool):
 
         v1 = client.CoreV1Api()
 
-        pod_log = v1.read_namespaced_pod_log(
-            name=name,
-            namespace=namespace,
-            container=container_name,
-            tail_lines=line_number,
-        )
+        try:
+            pod_log = v1.read_namespaced_pod_log(
+                name=name,
+                namespace=namespace,
+                container=container_name,
+                tail_lines=line_number,
+            )
+        except Exception as e:
+            return f"Error getting pod logs: {e}"
 
         return f"```\n{pod_log}\n```"
 
