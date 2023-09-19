@@ -105,7 +105,9 @@ class GetResourceDetailTool(BaseTool):
         )
         resource_kind = input.get("resource_kind")
         resource_name = input.get("resource_name")
-        namespace = input.get("namespace", "default")
+        namespace = input.get("namespace")
+        if namespace == "":
+            namespace = "default"
         gvk = context.search_api_resource(resource_kind)
         resources = dyn_client.resources.get(
             api_version=gvk.groupVersion,
@@ -113,7 +115,10 @@ class GetResourceDetailTool(BaseTool):
         )
 
         try:
-            resource = resources.get(name=resource_name, namespace=namespace)
+            resource_raw = resources.get(
+                name=resource_name, namespace=namespace
+            )
+            resource = resource_raw.to_dict()
             # make prompt short.
             del resource["metadata"]["managedFields"]
             del resource["metadata"]["resourceVersion"]
@@ -124,7 +129,7 @@ class GetResourceDetailTool(BaseTool):
         except Exception as e:
             return f"Error getting resource detail: {e}"
 
-        return json.dumps(resource.to_dict())
+        return json.dumps(resource)
 
 
 class GetPodLogsTool(BaseTool):
