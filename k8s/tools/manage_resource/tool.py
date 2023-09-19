@@ -12,6 +12,7 @@ from k8s.tools.common.endpoint import (
 )
 from k8s.tools.manage_resource.prompt import (
     CONSTRUCT_RESOURCES_TO_CREATE_PROMPT,
+    CONSTRUCT_RESOURCES_TO_UPDATE_PROMPT,
 )
 from tools.base.tools import RequireApprovalTool
 from kubernetes import config, dynamic, client
@@ -299,6 +300,61 @@ class ConstructResourceTool(BaseTool):
         prompt = PromptTemplate(
             template=CONSTRUCT_RESOURCES_TO_CREATE_PROMPT,
             input_variables=["query"],
+        )
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        return chain.run(json.dumps(query)).strip()
+
+
+class ConstructResourceForUpdateTool(BaseTool):
+    """Tool to construct a kubernetes resource for update."""
+
+    name = "construct_kubernetes_resource_for_update"
+    description = (
+        "Construct a Kubernetes resource for update. "
+        'Input to the tool should be a json with four keys: "user_query", "resource_kind", "resource_name" and "namespace".'
+        '"user_query" should be the description of an update task.'
+        "The output is the kubernetes resource spec for update in yaml format."
+    )
+    llm: BaseLanguageModel
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+        query = input.get("user_query")
+        resource_kind = input.get("resource_kind")
+        resource_name = input.get("resource_name")
+        namespace = input.get("namespace")
+        if namespace == "":
+            namespace = "default"
+
+        dyn_client = dynamic.DynamicClient(
+            api_client.ApiClient(configuration=config.load_kube_config())
+        )
+        gvk = context.search_api_resource(resource_kind)
+        resources = dyn_client.resources.get(
+            api_version=gvk.groupVersion,
+            kind=gvk.kind,
+        )
+
+        try:
+            resource_raw = resources.get(
+                name=resource_name, namespace=namespace
+            )
+            resource = resource_raw.to_dict()
+            # make prompt short.
+            del resource["metadata"]["managedFields"]
+            del resource["metadata"]["resourceVersion"]
+            del resource["metadata"]["uid"]
+            del resource["metadata"]["generation"]
+            del resource["status"]
+        except KeyError:
+            pass
+        except Exception as e:
+            return f"Error getting resource detail: {e}"
+
+        prompt = PromptTemplate(
+            template=CONSTRUCT_RESOURCES_TO_UPDATE_PROMPT,
+            input_variables=["query"],
+            partial_variables={"current_resource_spec": yaml.dump(resource)},
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
         return chain.run(json.dumps(query)).strip()

@@ -14,6 +14,7 @@ from k8s.tools.helm.tool import (
 )
 from k8s.tools.manage_resource.tool import (
     ApplyResourcesTool,
+    ConstructResourceForUpdateTool,
     ConstructResourceTool,
     DeleteResourceTool,
     GetIngressAccessEndpointsTool,
@@ -47,6 +48,7 @@ class KubernetesToolKit:
             WatchResourcesTool(return_direct=True),
             DeleteResourceTool(),
             ConstructResourceTool(llm=llm),
+            ConstructResourceForUpdateTool(llm=llm),
             ApplyResourcesTool(),
             SearchChartTool(llm=llm),
             DeployApplicationTool(),
