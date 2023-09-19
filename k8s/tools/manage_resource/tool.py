@@ -1,4 +1,5 @@
 import json
+import logging
 import subprocess
 import click
 from langchain import LLMChain, PromptTemplate
@@ -20,6 +21,8 @@ from kubernetes.client import api_client
 from k8s import context
 from utils import utils
 from i18n import text
+
+logger = logging.getLogger(__name__)
 
 
 class ListResourcesTool(BaseTool):
@@ -135,6 +138,55 @@ class GetResourceDetailTool(BaseTool):
             return f"Error getting resource detail: {e}"
 
         return json.dumps(resource)
+
+
+class GetResourceYamlTool(BaseTool):
+    """Tool to get yaml of a kubernetes resource."""
+
+    name = "get_kubernetes_resource_yaml"
+    description = (
+        "Get yaml of a kubernetes resource. "
+        'Input should be a json string with three keys: "resource_kind", "resource_name" and "namespace".'
+        "The output is the yaml of the resource."
+        "It directly prints the output. Use when users want to see the resoruce yaml."
+    )
+
+    def _run(self, text: str) -> str:
+        input = json.loads(text)
+
+        dyn_client = dynamic.DynamicClient(
+            api_client.ApiClient(configuration=config.load_kube_config())
+        )
+        resource_kind = input.get("resource_kind")
+        resource_name = input.get("resource_name")
+        namespace = input.get("namespace")
+        if namespace == "":
+            namespace = "default"
+        gvk = context.search_api_resource(resource_kind)
+        resources = dyn_client.resources.get(
+            api_version=gvk.groupVersion,
+            kind=gvk.kind,
+        )
+
+        try:
+            resource_raw = resources.get(
+                name=resource_name, namespace=namespace
+            )
+            resource = resource_raw.to_dict()
+            # make prompt short.
+            del resource["metadata"]["managedFields"]
+            del resource["metadata"]["resourceVersion"]
+            del resource["metadata"]["uid"]
+            del resource["metadata"]["generation"]
+        except KeyError:
+            pass
+        except Exception as e:
+            logger.debug(f"Error getting resource yaml: {e}")
+            # FIXME handle other cases
+            return f"Resource not found."
+
+        # Print raw output without markdown rendering
+        return f"{utils.raw_format_prefix}\n{yaml.dump(resource)}"
 
 
 class GetServiceAccessEndpointsTool(BaseTool):

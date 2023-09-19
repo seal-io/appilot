@@ -20,6 +20,7 @@ from k8s.tools.manage_resource.tool import (
     GetIngressAccessEndpointsTool,
     GetPodLogsTool,
     GetResourceDetailTool,
+    GetResourceYamlTool,
     GetServiceAccessEndpointsTool,
     ListResourcesTool,
     WatchResourcesTool,
@@ -42,6 +43,7 @@ class KubernetesToolKit:
         tools = [
             ListResourcesTool(return_direct=True),
             GetResourceDetailTool(),
+            GetResourceYamlTool(return_direct=True),
             GetServiceAccessEndpointsTool(),
             GetIngressAccessEndpointsTool(),
             GetPodLogsTool(return_direct=True),
