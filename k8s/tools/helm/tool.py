@@ -20,12 +20,12 @@ from kubernetes.client import api_client
 logger = logging.getLogger(__name__)
 
 
-def remove_empty_lines_and_comments(input_string):
-    cleaned_string = re.sub(r"^\s*#.*$", "", input_string, flags=re.MULTILINE)
-    cleaned_string = re.sub(r"\n\s*\n", "\n", cleaned_string)
-    cleaned_string = cleaned_string.strip()
+def trim_default_values(input_string):
+    """Trim default values of a helm chart to mitigate LLM rate limit. As a tradeoff some information is lost."""
+    lines = input_string.splitlines()
+    first_300_lines = "\n".join(lines[:300])
 
-    return cleaned_string
+    return first_300_lines
 
 
 def get_chart_default_values(chart_url: str):
@@ -37,7 +37,7 @@ def get_chart_default_values(chart_url: str):
             helm_show_values_command, shell=True, universal_newlines=True
         )
 
-        return remove_empty_lines_and_comments(output)
+        return trim_default_values(output)
     except subprocess.CalledProcessError as e:
         return f"Helm show values failed: {e}"
     except Exception as e:
@@ -159,19 +159,21 @@ class DeployApplicationTool(RequireApprovalTool):
 
         values = input.get("values")
         if values:
-            # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
-            if "global" in values:
-                values["global"]["metadata_chart_url"] = chart_url
-            else:
-                values["global"] = {"metadata_chart_url": chart_url}
+            values = {}
 
-            output_directory = "/tmp/appilot"
-            if not os.path.exists(output_directory):
-                os.makedirs(output_directory)
-            file_path = f"{output_directory}/values.yaml"
-            with open(file_path, "w") as file:
-                yaml.dump(input.get("values"), file)
-            helm_install_command += f" -f {file_path}"
+        # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
+        if "global" in values:
+            values["global"]["metadata_chart_url"] = chart_url
+        else:
+            values["global"] = {"metadata_chart_url": chart_url}
+
+        output_directory = "/tmp/appilot"
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        file_path = f"{output_directory}/values.yaml"
+        with open(file_path, "w") as file:
+            yaml.dump(input.get("values"), file)
+        helm_install_command += f" -f {file_path}"
 
         try:
             output = subprocess.check_output(
