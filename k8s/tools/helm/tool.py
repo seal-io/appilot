@@ -150,10 +150,12 @@ class DeployApplicationTool(RequireApprovalTool):
         chart_url = input.get("chart_url")
         name = input.get("name")
         namespace = input.get("namespace")
-        helm_install_command = f"helm install {name} {chart_url}"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            helm_install_command += f" --namespace {namespace}"
+        helm_install_command = (
+            f"helm install {name} {chart_url}  --namespace {namespace}"
+        )
 
         values = input.get("values")
         if values:
@@ -204,10 +206,8 @@ class GenerateUpgradeApplicationValuesTool(BaseTool):
         name = input.get("name")
         query = input.get("user_query")
 
-        helm_values_command = f"helm get values {name}"
-
-        if namespace != "":
-            helm_values_command += f" --namespace {namespace}"
+        if namespace == "":
+            namespace = "default"
 
         previous_values = get_helm_release_values(namespace, name)
 
@@ -270,10 +270,12 @@ class UpgradeApplicationTool(RequireApprovalTool):
         if not chart_url:
             return "Missing chart_url metadata in previous release"
 
-        helm_upgrade_command = f"helm upgrade {name} {chart_url}"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            helm_upgrade_command += f" --namespace {namespace}"
+        helm_upgrade_command = (
+            f"helm upgrade {name} {chart_url} --namespace {namespace}"
+        )
 
         if values:
             # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
@@ -304,10 +306,10 @@ class UpgradeApplicationTool(RequireApprovalTool):
 
 
 def get_pod_ready_status_of_helm_release(name: str, namespace: str) -> str:
-    helm_list_command = f"helm get manifest {name}"
+    if namespace == "":
+        namespace = "default"
 
-    if namespace != "":
-        helm_list_command += f" --namespace {namespace}"
+    helm_list_command = f"helm get manifest {name} --namespace {namespace}"
 
     try:
         output = subprocess.check_output(
@@ -489,7 +491,9 @@ class ListApplicationsTool(BaseTool):
 
         if namespace == "--all":
             helm_list_command += " --all-namespaces"
-        elif namespace != "":
+        else:
+            if namespace == "":
+                namespace = "default"
             helm_list_command += f" --namespace {namespace}"
 
         try:
@@ -527,10 +531,12 @@ class GetApplicationResourcesTool(BaseTool):
         name = input.get("name")
         namespace = input.get("namespace")
 
-        helm_manifest_command = f"helm get manifest {name}"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            helm_manifest_command += f" --namespace {namespace}"
+        helm_manifest_command = (
+            f"helm get manifest {name} --namespace {namespace}"
+        )
 
         try:
             output = subprocess.check_output(
@@ -585,8 +591,10 @@ class GetApplicationAccessEndpointsTool(BaseTool):
 
         helm_manifest_command = f"helm get manifest {name}"
 
-        if namespace != "":
-            helm_manifest_command += f" --namespace {namespace}"
+        if namespace == "":
+            namespace = "default"
+
+        helm_manifest_command += f" --namespace {namespace}"
 
         try:
             output = subprocess.check_output(
@@ -641,10 +649,12 @@ class GetApplicationDetailTool(BaseTool):
         name = input.get("name")
         namespace = input.get("namespace")
 
-        helm_status_command = f"helm status {name} --show-resources"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            helm_status_command += f" --namespace {namespace}"
+        helm_status_command = (
+            f"helm status {name} --show-resources --namespace {namespace}"
+        )
 
         try:
             output = subprocess.check_output(
@@ -679,10 +689,10 @@ class DeleteApplicationTool(RequireApprovalTool):
         name = input.get("name")
         namespace = input.get("namespace")
 
-        helm_delete_command = f"helm delete {name}"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            helm_delete_command += f" --namespace {namespace}"
+        helm_delete_command = f"helm delete {name} --namespace {namespace}"
 
         try:
             output = subprocess.check_output(

@@ -175,10 +175,12 @@ class WatchResourcesTool(BaseTool):
         resource_kind = str(input.get("resource_kind")).lower()
         namespace = str(input.get("namespace")).lower()
 
-        kubectl_watch_command = f"kubectl get {resource_kind} -w"
+        if namespace == "":
+            namespace = "default"
 
-        if namespace != "":
-            kubectl_watch_command += f" -n {namespace}"
+        kubectl_watch_command = (
+            f"kubectl get {resource_kind} -w -n {namespace}"
+        )
 
         try:
             click.echo(text.get("watch_service_note"))
