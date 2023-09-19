@@ -158,7 +158,10 @@ class DeployApplicationTool(RequireApprovalTool):
         values = input.get("values")
         if values:
             # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
-            values["metadata_chart_url"] = chart_url
+            if "global" in values:
+                values["global"]["metadata_chart_url"] = chart_url
+            else:
+                values["global"] = {"metadata_chart_url": chart_url}
 
             output_directory = "/tmp/appilot"
             if not os.path.exists(output_directory):
@@ -208,7 +211,11 @@ class GenerateUpgradeApplicationValuesTool(BaseTool):
 
         previous_values = get_helm_release_values(namespace, name)
 
-        chart_url = yaml.safe_load(previous_values).get("metadata_chart_url")
+        chart_url = (
+            yaml.safe_load(previous_values)
+            .get("global", {})
+            .get("metadata_chart_url")
+        )
         if not chart_url:
             return "Missing chart_url metadata in previous release"
 
@@ -226,8 +233,11 @@ class GenerateUpgradeApplicationValuesTool(BaseTool):
         overrided_values_yaml = chain.run(query).strip()
 
         overrided_values = yaml.safe_load(overrided_values_yaml)
-        if "metadata_chart_url" in overrided_values:
-            del overrided_values["metadata_chart_url"]
+        if (
+            "global" in overrided_values
+            and "metadata_chart_url" in overrided_values["global"]
+        ):
+            del overrided_values["global"]["metadata_chart_url"]
 
         return json.dumps(overrided_values)
 
@@ -252,7 +262,11 @@ class UpgradeApplicationTool(RequireApprovalTool):
 
         previous_values = get_helm_release_values(namespace, name)
 
-        chart_url = yaml.safe_load(previous_values).get("metadata_chart_url")
+        chart_url = (
+            yaml.safe_load(previous_values)
+            .get("global", {})
+            .get("metadata_chart_url")
+        )
         if not chart_url:
             return "Missing chart_url metadata in previous release"
 
@@ -263,7 +277,10 @@ class UpgradeApplicationTool(RequireApprovalTool):
 
         if values:
             # add chart_url to values as metadata until https://github.com/helm/helm/issues/4256 is resolved.
-            values["metadata_chart_url"] = chart_url
+            if "global" in values:
+                values["global"]["metadata_chart_url"] = chart_url
+            else:
+                values["global"] = {"metadata_chart_url": chart_url}
 
             output_directory = "/tmp/appilot"
             if not os.path.exists(output_directory):
