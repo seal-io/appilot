@@ -373,32 +373,50 @@ def get_resource_pods(dyn_client, namespace, resource):
 def get_service_endpoints(service):
     service_endpoints = []
     if service.spec.type == "NodePort":
-        node_ip = get_node_ip()
-        for port in service.spec.ports:
-            service_endpoints.append(
-                {
-                    "name": f"{service.metadata.name}/{port.name}",
-                    "endpoint": f"{node_ip}:{port.nodePort}",
-                }
-            )
+        service_endpoints.extend(get_nodeport_service_endpoints(service))
     elif service.spec.type == "LoadBalancer":
+        service_endpoints.extend(get_loadbalancer_service_endpoints(service))
+
+    return service_endpoints
+
+
+def get_loadbalancer_service_endpoints(service):
+    if (
+        service.status.load_balancer
+        and "ingress" in service.status.load_balancer
+    ):
+        endpoints = []
         for ingress in service.status.load_balancer.ingress:
             if ingress.hostname != "":
-                service_endpoints.append(
+                endpoints.append(
                     {
                         "name": service.name,
                         "endpoint": ingress.hostname,
                     }
                 )
             elif ingress.ip != "":
-                service_endpoints.append(
+                endpoints.append(
                     {
                         "name": service.name,
                         "endpoint": ingress.ip,
                     }
                 )
+        return endpoints
+    else:
+        return get_nodeport_service_endpoints(service)
 
-    return service_endpoints
+
+def get_nodeport_service_endpoints(service):
+    endpoints = []
+    node_ip = get_node_ip()
+    for port in service.spec.ports:
+        endpoints.append(
+            {
+                "name": f"{service.metadata.name}/{port.name}",
+                "endpoint": f"{node_ip}:{port.nodePort}",
+            }
+        )
+    return endpoints
 
 
 def get_ingress_endpoints(ingress):
