@@ -196,7 +196,7 @@ class GenerateUpgradeApplicationValuesTool(BaseTool):
 
     name = "generate_upgrade_application_values"
     description = (
-        "Generate values for upgrading an application."
+        "Generate values for upgrading an application deployed by helm chart."
         'Input should be a json string with three keys, "namespace", "name", "user_query".'
         '"namespace" is the namespace of the application.'
         '"name" is the name of the application.'

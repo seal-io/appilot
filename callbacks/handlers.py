@@ -13,11 +13,28 @@ from langchain.schema.output import LLMResult
 from langchain.schema.output import LLMResult
 from pygments import highlight
 from pygments.lexers import JsonLexer
+from pygments.lexers import YamlLexer
 from pygments.formatters import TerminalFormatter
 
 
 class HumanRejectedException(Exception):
     """Exception to raise when a person manually review and rejects a value."""
+
+
+def remove_triple_backticks(text):
+    if text.startswith("```") and text.endswith("```"):
+        lines = text.split("\n")
+
+        if len(lines) <= 1:
+            return ""
+
+        lines = lines[1:-1]
+
+        result_text = "\n".join(lines)
+
+        return result_text
+
+    return text
 
 
 class ApprovalCallbackHandler(BaseCallbackHandler):
@@ -41,6 +58,7 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
 
     def _approve(self, _input: str, serialized: Dict[str, Any]) -> bool:
         message = text.get("ask_approval")
+        _input = remove_triple_backticks(_input.strip())
 
         try:
             json_input = json.loads(_input)
@@ -49,8 +67,20 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
             pass
         else:
             # Serialize the JSON input with colors
+            is_json = True
             json_string = json.dumps(json_input, indent=4)
             _input = highlight(json_string, JsonLexer(), TerminalFormatter())
+
+        if not is_json:
+            # Now try YAML
+            try:
+                yaml.safe_load_all(_input)
+            except Exception as e:
+                # If the input is not a valid YAML, just pass
+                pass
+            else:
+                # Serialize the YAML input with colors
+                _input = highlight(_input, YamlLexer(), TerminalFormatter())
 
         return click.confirm(
             message.format(input=_input, tool_name=serialized["name"]),

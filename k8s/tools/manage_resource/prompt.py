@@ -10,6 +10,7 @@ CONSTRUCTED RESOURCES:
 
 Strictly follow the above output format, do not add extra explanation or words.
 The output will be applied to a kubernetes cluster for creation.
+Ensure the output has no placeholders and requires no external inputs.
 
 User query: {query}
 
