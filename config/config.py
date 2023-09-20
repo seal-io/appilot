@@ -1,4 +1,6 @@
 import logging
+
+import urllib3
 from utils import utils
 
 from pydantic import BaseModel
@@ -31,6 +33,8 @@ def init():
 
     if not verbose:
         logging.basicConfig(level=logging.CRITICAL)
+        # Disable child loggers of urllib3, e.g. urllib3.connectionpool
+        logging.getLogger(urllib3.__package__).propagate = False
 
     global APPILOT_CONFIG
     APPILOT_CONFIG = Config(
