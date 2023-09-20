@@ -10,8 +10,8 @@ It is an experimental project that helps you operate applications using GPT-like
 - Diagnose: view logs, find flaws and provide fixes.
 - Safeguard: any action involving state changes requires human approval.
 - Hybrid infrastructure: works on kubernetes, VM, cloud, on-prem.
-- Multi language support: It's not restricted to a specific natural language. Choose the one you're comfortable with.
-- Pluggable backends: It supports multiple backends including Walrus and Kubernetes, and is extensible.
+- Multi language support: Choose the natural language you're comfortable with.
+- Pluggable backends: It supports multiple backends including [Walrus](https://github.com/seal-io/walrus) and [Kubernetes](https://kubernetes.io), and is extensible.
 
 ## Demo
 
@@ -43,7 +43,7 @@ git clone https://github.com/seal-io/appilot && cd appilot
 2. Run the following command to get the envfile.
 
 ```
-mv .env.example .env
+cp .env.example .env
 ```
 
 3. Edit the `.env` file and fill in `OPENAI_API_KEY`.
@@ -63,7 +63,9 @@ make run
 6. Ask Appilot to deploy an application, e.g.:
 
 ```
-Deploy a jupyterhub.
+> Deploy a jupyterhub.
+...
+> Get url of the jupyterhub.
 ```
 
 ## Usage
@@ -87,7 +89,9 @@ Appilot is configurable via environment variable or the envfile:
 
 ### Using Walrus Backend
 
-Walrus backend provides features like hybrid infrastructure support, environment management, etc.
+> **Prerequisites:** [Install Walrus](https://seal-io.github.io/docs/quickstart).
+
+Walrus serves as the application management engine. It provides features like hybrid infrastructure support, environment management, etc.
 To enable Walrus backend, edit the envfile:
 
 1. Set `TOOLKITS=walrus`
@@ -108,7 +112,7 @@ You can run Appilot in docker container when using Walrus backend.
 1. Get an envfile by running the following command.
 
 ```
-mv .env.example .env
+cp .env.example .env
 ```
 
 2. Configure the `.env` file.
