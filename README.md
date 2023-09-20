@@ -15,7 +15,7 @@ It is an experimental project that helps you operate applications using GPT-like
 
 ## Demo
 
-Deploying llama-2 on AWS:
+Chat to deploy llama-2 on AWS:
 
 https://github.com/seal-io/appilot/assets/5697937/0562fe29-8e97-42ba-bbf6-eaa5b5fefc41
 
@@ -23,6 +23,7 @@ Other use cases:
 
 - [Manage applications in Kubernetes using helm charts](./examples/k8s_helm.md)
 - [Operating native Kubernetes resources](./examples/k8s_yaml.md)
+- [Diagnose and fix issues](./examples/k8s_diagnose.md)
 
 ## Run
 
