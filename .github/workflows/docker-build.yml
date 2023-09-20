@@ -1,4 +1,4 @@
-name: Build Appilot Image
+name: CI
 
 on:
   workflow_dispatch: {}
@@ -13,9 +13,31 @@ env:
   BUILD_PLATFORMS: "linux/amd64,linux/arm64"
 
 jobs:
-  build-and-push:
+  skip:
+    timeout-minutes: 5
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write
+    outputs:
+      should: ${{ steps.duplicate.outputs.should_skip }}
+    steps:
+      - name: Check Duplicate
+        id: duplicate
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          github_token: "${{ github.token }}"
+          paths_ignore: '["**.md", "**.mdx", "**.png", "**.jpg"]'
+          do_not_skip: '["workflow_dispatch"]'
+        continue-on-error: true
 
+  build-and-push:
+    needs:
+      - skip
+    if: needs.skip.outputs.should != 'true'
+
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
