@@ -93,7 +93,9 @@ class DeleteResourceTool(RequireApprovalTool):
         )
         resource_kind = input.get("resource_kind")
         resource_name = input.get("resource_name")
-        namespace = input.get("namespace", "default")
+        namespace = input.get("namespace")
+        if namespace == "":
+            namespace = "default"
         gvk = context.search_api_resource(resource_kind)
         resources = dyn_client.resources.get(
             api_version=gvk.groupVersion,
