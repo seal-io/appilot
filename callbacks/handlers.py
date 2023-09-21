@@ -60,6 +60,7 @@ class ApprovalCallbackHandler(BaseCallbackHandler):
         message = text.get("ask_approval")
         _input = remove_triple_backticks(_input.strip())
 
+        is_json = False
         try:
             json_input = json.loads(_input)
         except Exception as e:
