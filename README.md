@@ -89,6 +89,10 @@ Appilot is configurable via environment variable or the envfile:
 | WALRUS_DEFAULT_PROJECT | Project name for the default context, valid when Walrus toolkit is enabled. | "" |
 | WALRUS_DEFAULT_ENVIRONMENT | Environment name for the default context, valid when Walrus toolkit is enabled. | "" |
 
+### Using Kubernetes Backend
+
+Follow steps in quickstart to run with Kubernetes backend.
+
 ### Using Walrus Backend
 
 > **Prerequisites:** [Install Walrus](https://seal-io.github.io/docs/quickstart).
