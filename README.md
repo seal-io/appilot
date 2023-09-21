@@ -21,6 +21,8 @@ https://github.com/seal-io/appilot/assets/5697937/0562fe29-8e97-42ba-bbf6-eaa5b5
 
 Other use cases:
 
+- [Deploy from source code](./examples/walrus_deploy_source_code.md)
+- [Manage environments](./examples/walrus_manage_environment.md)
 - [Manage applications in Kubernetes using helm charts](./examples/k8s_helm.md)
 - [Operating native Kubernetes resources](./examples/k8s_yaml.md)
 - [Diagnose and fix issues](./examples/k8s_diagnose.md)
