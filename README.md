@@ -132,6 +132,14 @@ cp .env.example .env
 docker run -it --env-file .env sealio/appilot:main
 ```
 
+### Using LLM alternatives to GPT-4
+
+You can use other LLMs as the reasoning engine of Appilot, as long as it serves inference APIs in openAI compatible way.
+
+1. Configure the `.env` file, then set `OPENAI_API_BASE=https://your-api-base`.
+
+2. Run Appilot as normal.
+
 ## How it works
 
 The following is the architecture diagram of Appilot:
